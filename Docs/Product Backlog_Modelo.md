@@ -17,6 +17,8 @@ O sistema deve permitir o cadastro completo de tutores com os seguintes campos o
 - [ ] CPF deve seguir o formato válido (11 dígitos).
 - [ ] Sistema deve impedir cadastro de CPF duplicado.
 - [ ] Mensagem de sucesso/erro deve ser exibida ao usuário.
+- [ ] Armazenar CPF sem mascaras (apenas numeros).
+- [ ] Armazenar telefone sem mascaras (apenas numeros).
 
 #### 🏗️ Impacto Arquitetural:
 - **Camada de Dados (Etapa 3)** → Card #9 e #10
