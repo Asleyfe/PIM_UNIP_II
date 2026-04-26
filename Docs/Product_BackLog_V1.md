@@ -133,7 +133,6 @@ O sistema deve permitir que veterinários e funcionários autorizados armazenem 
 - [ ] Data e hora de registro automáticas.
 - [ ] Histórico completo do animal acessível a qualquer veterinário.
 - [ ] O prontuário deve ser um registro único por consulta (não deve permitir múltiplas entradas por consulta).
-- [ ] Deve haver um "Check-in" para marcar a entrada do animal na consulta e um "Check-out" para marcar a saída e finalizar o prontuário.
 - [ ] Deve ser possivel filtrar por animal e historico(prontuarios), validar a evolução do animal.
 
 #### 🏗️ Impacto Arquitetural:
@@ -172,7 +171,7 @@ O sistema deve permitir que funcionários do pet shop cadastrem novos produtos, 
 - [ ] Validade deve ser obrigatória para medicamentos e raçoes.
 - [ ] Registro de entrada (compra) e saída (venda/uso).
 - [ ] Em caso de uso, deve ser informado o funcionario que utilizou o produto.
-- [ ] Estoque nunca pode ficar negativo(Opcional com alerta de estoque minimo).
+- [ ] Estoque pode ser negativo em caso de não trabalhar mais com o produto.
 - [ ] Alerta visual quando estoque atingir nível mínimo.
 
 #### 🏗️ Impacto Arquitetural:
@@ -267,6 +266,7 @@ O sistema deve permitir que funcionários configurem o envio automático de lemb
 - [ ] Lembrete disparado automaticamente X dias antes da vacina vencer (configurável).
 - [ ] Lembrete de confirmação de consulta enviado 24h antes.
 - [ ] Registro de lembretes enviados no histórico do animal.
+- [ ] validar envio email e whatsapp.
 
 #### 🏗️ Impacto Arquitetural:
 - **Camada de Dados (Etapa 3)** → Card #10
