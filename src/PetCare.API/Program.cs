@@ -1,9 +1,21 @@
+using PetCare.Domain.Interfaces.Repositories;
+using PetCare.Infrastructure.Data;
+using PetCare.Infrastructure.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Conexão com o banco de dados (Supabase/PostgreSQL)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' não encontrada.");
+
+builder.Services.AddSingleton<IConnectionFactory>(new NpgsqlConnectionFactory(connectionString));
+
+// Repositórios
+builder.Services.AddScoped<ITutorRepository, TutorRepository>();
 
 var app = builder.Build();
 
@@ -15,6 +27,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.MapControllers();
 
 var summaries = new[]
 {
