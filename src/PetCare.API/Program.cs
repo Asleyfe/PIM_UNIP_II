@@ -1,57 +1,64 @@
-using PetCare.Domain.Interfaces.Repositories;
+using PetCare.API.Middleware;
+using PetCare.Infrastructure.Configuration;
 using PetCare.Infrastructure.Data;
-using PetCare.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// =============================================================================
+// CONFIGURAÇÃO DO DAPPER (chamada única, antes de qualquer query)
+// =============================================================================
+DapperSetup.Configure();
+
+// =============================================================================
+// CONFIGURAÇÕES (appsettings)
+// =============================================================================
+builder.Services.Configure<SupabaseSettings>(
+    builder.Configuration.GetSection(SupabaseSettings.SectionName));
+
+// =============================================================================
+// INFRAESTRUTURA — Conexão com banco
+// =============================================================================
+builder.Services.AddSingleton<IConnectionFactory, NpgsqlConnectionFactory>();
+
+// =============================================================================
+// REPOSITÓRIOS — (vão entrar aqui conforme implementarmos)
+// builder.Services.AddScoped<ITutorRepository, TutorRepository>();
+// =============================================================================
+
+// =============================================================================
+// SERVICES (Application) — (entram aqui conforme implementarmos)
+// builder.Services.AddScoped<ITutorService, TutorService>();
+// =============================================================================
+
+// =============================================================================
+// API
+// =============================================================================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Conexão com o banco de dados (Supabase/PostgreSQL)
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' não encontrada.");
-
-builder.Services.AddSingleton<IConnectionFactory>(new NpgsqlConnectionFactory(connectionString));
-
-// Repositórios
-builder.Services.AddScoped<ITutorRepository, TutorRepository>();
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// =============================================================================
+// PIPELINE HTTP
+// =============================================================================
+
+// Middleware de tratamento global de erros (PRIMEIRO!)
+app.UseMiddleware<TratamentoErrosMiddleware>();
+
+// Swagger (só em desenvolvimento)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// Servir arquivos estáticos (wwwroot/) — front-end vai aqui na Sprint 3
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseHttpsRedirection();
+app.UseAuthorization();
 app.MapControllers();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

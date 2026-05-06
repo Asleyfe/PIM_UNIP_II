@@ -21,7 +21,6 @@ Este documento serve como guia para o time de desenvolvimento na decomposição 
 ```
 
 ---
-
 ## Decomposição em Tasks por Camada
 
 ### Card #9 — Modelo Conceitual (Etapa 3 - Dados)
