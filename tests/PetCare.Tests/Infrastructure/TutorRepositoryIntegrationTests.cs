@@ -1,9 +1,12 @@
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using PetCare.Domain.Entities.Pessoas;
 using PetCare.Domain.ValueObjects;
+using PetCare.Infrastructure.Configuration;
 using PetCare.Infrastructure.Data;
 using PetCare.Infrastructure.Repositories;
+
 
 namespace PetCare.Tests.Infrastructure;
 
@@ -24,7 +27,8 @@ public class TutorRepositoryIntegrationTests
         var connectionString = config.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string não encontrada em appsettings.test.json");
 
-        var factory = new NpgsqlConnectionFactory(connectionString);
+        var factory = new NpgsqlConnectionFactory(
+            Options.Create(new SupabaseSettings { ConnectionString = connectionString }));
         _repository = new TutorRepository(factory);
     }
 

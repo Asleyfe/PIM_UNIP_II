@@ -6,6 +6,7 @@
 # dotenv files
 appsettings.Development.json
 appsettings.*.Local.json
+appsettings.test.json
 .env
 .env.local
 
