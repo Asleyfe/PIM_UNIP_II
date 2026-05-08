@@ -31,20 +31,20 @@ A arquitetura segue o padrão **Clean Architecture** com 4 camadas. A regra fund
 
 ```mermaid
 flowchart LR
-    API["PetCare.API<br/>Controllers, HTML, DI"]
+    WEB["PetCare.Web<br/>Controllers, Views, DI"]
     APP["PetCare.Application<br/>Services, DTOs, Mappers"]
     DOMAIN["PetCare.Domain<br/>Entities, regras puras"]
     INFRA["PetCare.Infrastructure<br/>Repositories, Dapper"]
     DB[("Supabase Postgres<br/>Tabelas, triggers, views")]
 
-    API --> APP
+    WEB --> APP
     APP --> DOMAIN
     INFRA --> DOMAIN
-    API --> INFRA
+    WEB --> INFRA
     INFRA --> DB
 
     style DOMAIN fill:#5DCAA5,stroke:#0F6E56,color:#04342C
-    style API fill:#85B7EB,stroke:#185FA5,color:#042C53
+    style WEB fill:#85B7EB,stroke:#185FA5,color:#042C53
     style APP fill:#AFA9EC,stroke:#534AB7,color:#26215C
     style INFRA fill:#EF9F27,stroke:#854F0B,color:#412402
     style DB fill:#B4B2A9,stroke:#5F5E5A,color:#2C2C2A

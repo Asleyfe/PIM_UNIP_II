@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using PetCare.Domain.Exceptions;
-using PetCare.Domain.Interfaces.Repositories;
+using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
@@ -8,24 +7,24 @@ namespace PetCare.Web.Controllers;
 [Route("api/[controller]")]
 public class TutoresController : ControllerBase
 {
-    private readonly ITutorRepository _tutorRepository;
+    private readonly ITutorService _tutorService;
 
-    public TutoresController(ITutorRepository tutorRepository)
+    public TutoresController(ITutorService tutorService)
     {
-        _tutorRepository = tutorRepository;
+        _tutorService = tutorService;
     }
 
     [HttpGet]
     public async Task<IActionResult> Listar()
     {
-        var tutores = await _tutorRepository.Listar();
+        var tutores = await _tutorService.ListarTodos();
         return Ok(tutores);
     }
 
     [HttpGet("{id:long}")]
     public async Task<IActionResult> ObterPorId(long id)
     {
-        var tutor = await _tutorRepository.ObterPorId(id);
+        var tutor = await _tutorService.ObterPorId(id);
         if (tutor is null)
             return NotFound(new { mensagem = $"Tutor com id {id} não encontrado." });
 
@@ -38,7 +37,7 @@ public class TutoresController : ControllerBase
         if (string.IsNullOrWhiteSpace(termo))
             return BadRequest(new { mensagem = "Informe um termo para busca." });
 
-        var tutores = await _tutorRepository.BuscarPorTermo(termo);
+        var tutores = await _tutorService.Buscar(termo);
         return Ok(tutores);
     }
 }
