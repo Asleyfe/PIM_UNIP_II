@@ -2,6 +2,6 @@
 
 public enum StatusEnvio
 {
-    Enviado,
-    Falha
+    ENVIADO,
+    FALHA
 }

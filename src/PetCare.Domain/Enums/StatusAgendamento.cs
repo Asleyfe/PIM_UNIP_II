@@ -6,7 +6,7 @@
 /// </summary>
 public enum StatusAgendamento
 {
-    Agendado,
-    Cancelado,
-    Concluido
+    AGENDADO,
+    CANCELADO,
+    CONCLUIDO
 }

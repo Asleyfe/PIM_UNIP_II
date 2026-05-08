@@ -2,6 +2,6 @@
 
 public enum MeioEnvio
 {
-    Email,
-    Whatsapp
+    EMAIL,
+    WHATSAPP
 }

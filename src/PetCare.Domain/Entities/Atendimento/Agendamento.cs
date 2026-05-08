@@ -37,7 +37,7 @@ public class Agendamento : EntidadeBase
     /// </summary>
     protected Agendamento()
     {
-        Status = StatusAgendamento.Agendado;
+        Status = StatusAgendamento.AGENDADO;
         Observacao = null;
     }
 
@@ -66,7 +66,7 @@ public class Agendamento : EntidadeBase
         AnimalId = animalId;
         VeterinarioId = veterinarioId;
         DataHoraConsulta = dataHoraUtc;
-        Status = StatusAgendamento.Agendado;
+        Status = StatusAgendamento.AGENDADO;
         Observacao = observacao?.Trim();
     }
 
@@ -79,11 +79,11 @@ public class Agendamento : EntidadeBase
     /// </summary>
     public void Concluir()
     {
-        if (Status != StatusAgendamento.Agendado)
+        if (Status != StatusAgendamento.AGENDADO)
             throw new DominioException(
                 $"Só é possível concluir agendamentos no status Agendado. Status atual: {Status}.");
 
-        Status = StatusAgendamento.Concluido;
+        Status = StatusAgendamento.CONCLUIDO;
     }
 
     /// <summary>
@@ -91,11 +91,11 @@ public class Agendamento : EntidadeBase
     /// </summary>
     public void Cancelar()
     {
-        if (Status != StatusAgendamento.Agendado)
+        if (Status != StatusAgendamento.AGENDADO)
             throw new DominioException(
                 $"Só é possível cancelar agendamentos no status Agendado. Status atual: {Status}.");
 
-        Status = StatusAgendamento.Cancelado;
+        Status = StatusAgendamento.CANCELADO;
     }
 
     /// <summary>
@@ -103,7 +103,7 @@ public class Agendamento : EntidadeBase
     /// </summary>
     public void Reagendar(DateTime novaDataHora)
     {
-        if (Status != StatusAgendamento.Agendado)
+        if (Status != StatusAgendamento.AGENDADO)
             throw new DominioException(
                 $"Só é possível reagendar consultas no status Agendado. Status atual: {Status}.");
 

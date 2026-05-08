@@ -1,0 +1,144 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.agendamento (
+  id bigint NOT NULL DEFAULT nextval('agendamento_id_seq'::regclass),
+  tutor_id bigint,
+  animal_id bigint,
+  veterinario_id bigint,
+  datahora_consulta timestamp with time zone NOT NULL,
+  status character varying DEFAULT 'AGENDADO'::character varying CHECK (status::text = ANY (ARRAY['AGENDADO'::character varying, 'CANCELADO'::character varying, 'CONCLUIDO'::character varying]::text[])),
+  observacao character varying,
+  data_criacao timestamp without time zone DEFAULT now(),
+  CONSTRAINT agendamento_pkey PRIMARY KEY (id),
+  CONSTRAINT agendamento_tutor_id_fkey FOREIGN KEY (tutor_id) REFERENCES public.tutor(id),
+  CONSTRAINT agendamento_animal_id_fkey FOREIGN KEY (animal_id) REFERENCES public.animal(id),
+  CONSTRAINT agendamento_veterinario_id_fkey FOREIGN KEY (veterinario_id) REFERENCES public.veterinario(id)
+);
+CREATE TABLE public.animal (
+  id bigint NOT NULL DEFAULT nextval('animal_id_seq'::regclass),
+  nome character varying NOT NULL,
+  data_nascimento date NOT NULL,
+  peso numeric NOT NULL,
+  sexo character varying NOT NULL,
+  tutor_id bigint,
+  raca_id bigint,
+  created_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT animal_pkey PRIMARY KEY (id),
+  CONSTRAINT animal_tutor_id_fkey FOREIGN KEY (tutor_id) REFERENCES public.tutor(id),
+  CONSTRAINT animal_raca_id_fkey FOREIGN KEY (raca_id) REFERENCES public.raca(id)
+);
+CREATE TABLE public.especie (
+  id bigint NOT NULL DEFAULT nextval('especie_id_seq'::regclass),
+  nome character varying NOT NULL UNIQUE,
+  CONSTRAINT especie_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.historico_clinico (
+  id bigint NOT NULL DEFAULT nextval('historico_clinico_id_seq'::regclass),
+  animal_id bigint,
+  descricao character varying NOT NULL,
+  data_registro timestamp without time zone DEFAULT now(),
+  veterinario_id bigint,
+  CONSTRAINT historico_clinico_pkey PRIMARY KEY (id),
+  CONSTRAINT historico_clinico_animal_id_fkey FOREIGN KEY (animal_id) REFERENCES public.animal(id),
+  CONSTRAINT historico_clinico_veterinario_id_fkey FOREIGN KEY (veterinario_id) REFERENCES public.veterinario(id)
+);
+CREATE TABLE public.item_venda (
+  id bigint NOT NULL DEFAULT nextval('item_venda_id_seq'::regclass),
+  venda_id bigint,
+  produto_id bigint,
+  quantidade integer NOT NULL CHECK (quantidade > 0),
+  preco_unitario numeric NOT NULL CHECK (preco_unitario > 0::numeric),
+  CONSTRAINT item_venda_pkey PRIMARY KEY (id),
+  CONSTRAINT item_venda_venda_id_fkey FOREIGN KEY (venda_id) REFERENCES public.venda(id),
+  CONSTRAINT item_venda_produto_id_fkey FOREIGN KEY (produto_id) REFERENCES public.produto(id)
+);
+CREATE TABLE public.lembrete_enviado (
+  id bigint NOT NULL DEFAULT nextval('lembrete_enviado_id_seq'::regclass),
+  tutor_id bigint,
+  animal_id bigint,
+  agendamento_id bigint,
+  tipo character varying NOT NULL CHECK (tipo::text = ANY (ARRAY['CONSULTA'::character varying, 'VACINA'::character varying]::text[])),
+  meio_envio character varying NOT NULL CHECK (meio_envio::text = ANY (ARRAY['EMAIL'::character varying, 'WHATSAPP'::character varying]::text[])),
+  status_envio character varying NOT NULL CHECK (status_envio::text = ANY (ARRAY['ENVIADO'::character varying, 'FALHA'::character varying]::text[])),
+  data_envio timestamp without time zone DEFAULT now(),
+  mensagem character varying,
+  CONSTRAINT lembrete_enviado_pkey PRIMARY KEY (id),
+  CONSTRAINT lembrete_enviado_tutor_id_fkey FOREIGN KEY (tutor_id) REFERENCES public.tutor(id),
+  CONSTRAINT lembrete_enviado_animal_id_fkey FOREIGN KEY (animal_id) REFERENCES public.animal(id),
+  CONSTRAINT lembrete_enviado_agendamento_id_fkey FOREIGN KEY (agendamento_id) REFERENCES public.agendamento(id)
+);
+CREATE TABLE public.movimentacao_estoque (
+  id bigint NOT NULL DEFAULT nextval('movimentacao_estoque_id_seq'::regclass),
+  produto_id bigint,
+  quantidade integer NOT NULL,
+  tipo character varying NOT NULL CHECK (tipo::text = ANY (ARRAY['ENTRADA'::character varying, 'SAIDA'::character varying]::text[])),
+  data_movimentacao timestamp without time zone DEFAULT now(),
+  CONSTRAINT movimentacao_estoque_pkey PRIMARY KEY (id),
+  CONSTRAINT movimentacao_estoque_produto_id_fkey FOREIGN KEY (produto_id) REFERENCES public.produto(id)
+);
+CREATE TABLE public.produto (
+  id bigint NOT NULL DEFAULT nextval('produto_id_seq'::regclass),
+  nome character varying NOT NULL,
+  preco numeric NOT NULL,
+  descricao character varying,
+  categoria character varying NOT NULL,
+  quantidade_estoque integer DEFAULT 0,
+  estoque_minimo integer NOT NULL,
+  validade timestamp without time zone,
+  created_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT produto_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.prontuario (
+  id bigint NOT NULL DEFAULT nextval('prontuario_id_seq'::regclass),
+  agendamento_id bigint UNIQUE,
+  queixa_principal character varying NOT NULL,
+  relato_tutor character varying,
+  exame_fisico character varying,
+  diagnostico character varying,
+  prescricao character varying,
+  observacoes character varying,
+  data_registro timestamp without time zone DEFAULT now(),
+  CONSTRAINT prontuario_pkey PRIMARY KEY (id),
+  CONSTRAINT prontuario_agendamento_id_fkey FOREIGN KEY (agendamento_id) REFERENCES public.agendamento(id)
+);
+CREATE TABLE public.raca (
+  id bigint NOT NULL DEFAULT nextval('raca_id_seq'::regclass),
+  nome character varying NOT NULL,
+  especie_id bigint,
+  CONSTRAINT raca_pkey PRIMARY KEY (id),
+  CONSTRAINT raca_especie_id_fkey FOREIGN KEY (especie_id) REFERENCES public.especie(id)
+);
+CREATE TABLE public.tutor (
+  id bigint NOT NULL DEFAULT nextval('tutor_id_seq'::regclass),
+  nome character varying NOT NULL,
+  cpf character varying NOT NULL UNIQUE CHECK (fn_validar_cpf(cpf)),
+  telefone character varying NOT NULL,
+  email character varying NOT NULL UNIQUE,
+  rua character varying NOT NULL,
+  numero character varying NOT NULL,
+  bairro character varying NOT NULL,
+  cidade character varying NOT NULL,
+  estado character varying NOT NULL,
+  created_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT tutor_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.venda (
+  id bigint NOT NULL DEFAULT nextval('venda_id_seq'::regclass),
+  tutor_id bigint,
+  data_venda timestamp without time zone DEFAULT now(),
+  valor_total numeric NOT NULL,
+  forma_pagamento character varying NOT NULL,
+  observacao character varying,
+  CONSTRAINT venda_pkey PRIMARY KEY (id),
+  CONSTRAINT venda_tutor_id_fkey FOREIGN KEY (tutor_id) REFERENCES public.tutor(id)
+);
+CREATE TABLE public.veterinario (
+  id bigint NOT NULL DEFAULT nextval('veterinario_id_seq'::regclass),
+  nome character varying NOT NULL,
+  crmv character varying NOT NULL UNIQUE,
+  telefone character varying,
+  email character varying,
+  created_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT veterinario_pkey PRIMARY KEY (id)
+);

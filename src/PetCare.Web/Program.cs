@@ -23,6 +23,7 @@ builder.Services.Configure<SupabaseSettings>(
 // Injeção de Dependência - Infra
 builder.Services.AddSingleton<IConnectionFactory, NpgsqlConnectionFactory>();
 builder.Services.AddScoped<ITutorRepository, TutorRepository>();
+builder.Services.AddScoped<IAnimalRepository, AnimalRepository>();
 
 // Injeção de Dependência - Application
 builder.Services.AddScoped<ITutorService, TutorService>();
