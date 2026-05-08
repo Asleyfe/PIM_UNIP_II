@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using PetCare.Domain.Exceptions;
 
-namespace PetCare.API.Middleware;
+namespace PetCare.Web.Middleware;
 
 /// <summary>
 /// Middleware global para captura de exceções.

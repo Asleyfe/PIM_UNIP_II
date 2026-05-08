@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PetCare.Domain.Exceptions;
 using PetCare.Domain.Interfaces.Repositories;
 
-namespace PetCare.API.Controllers;
+namespace PetCare.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
