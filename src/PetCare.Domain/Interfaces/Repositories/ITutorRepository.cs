@@ -15,4 +15,14 @@ public interface ITutorRepository : IRepositorioBase<Tutor>
     /// Usado pelo autocomplete na tela de agendamento.
     /// </summary>
     Task<IEnumerable<Tutor>> BuscarPorTermo(string termo);
+    
+    Task<Tutor> Inserir(Tutor tutor);
+
+    Task<Tutor?> ObterPorId(long id);
+
+    Task<IEnumerable<Tutor>> ObterTodos();
+
+    Task Atualizar(Tutor tutor);
+
+    Task Deletar(long id);
 }
