@@ -27,6 +27,7 @@ builder.Services.AddScoped<IAnimalRepository, AnimalRepository>();
 
 // Injeção de Dependência - Application
 builder.Services.AddScoped<ITutorService, TutorService>();
+builder.Services.AddScoped<IAnimalService, AnimalService>();
 
 var app = builder.Build();
 
