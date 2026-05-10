@@ -24,10 +24,21 @@ builder.Services.Configure<SupabaseSettings>(
 builder.Services.AddSingleton<IConnectionFactory, NpgsqlConnectionFactory>();
 builder.Services.AddScoped<ITutorRepository, TutorRepository>();
 builder.Services.AddScoped<IAnimalRepository, AnimalRepository>();
+builder.Services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
+builder.Services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<IMovimentacaoEstoqueRepository, MovimentacaoEstoqueRepository>();
+builder.Services.AddScoped<IProntuarioRepository, ProntuarioRepository>();
+builder.Services.AddScoped<IVendaRepository, VendaRepository>();
 
 // Injeção de Dependência - Application
 builder.Services.AddScoped<ITutorService, TutorService>();
 builder.Services.AddScoped<IAnimalService, AnimalService>();
+builder.Services.AddScoped<IVeterinarioService, VeterinarioService>();
+builder.Services.AddScoped<IAgendamentoService, AgendamentoService>();
+builder.Services.AddScoped<IEstoqueService, EstoqueService>();
+builder.Services.AddScoped<IProntuarioService, ProntuarioService>();
+builder.Services.AddScoped<IVendaService, VendaService>();
 
 var app = builder.Build();
 

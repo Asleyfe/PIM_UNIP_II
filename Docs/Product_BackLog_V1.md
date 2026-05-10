@@ -30,6 +30,7 @@ Este documento contém a lista de requisitos funcionais decompostos para facilit
 O sistema deve permitir que funcionários da recepção cadastrem, editem, visualizem e cancelem agendamentos de consultas veterinárias. O sistema deve também permitir que os clientes visualizem sua agenda de consultas.
 
 #### ✅ Critérios de Aceite:
+
 - [ ] Permitir seleção de Tutor, Animal e Veterinário.
 - [ ] Validar se o veterinário possui disponibilidade no horário escolhido.
 - [ ] Sistema deve impedir agendamento duplicado (mesmo veterinário + mesmo horário).

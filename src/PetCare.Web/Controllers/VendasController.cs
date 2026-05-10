@@ -1,0 +1,59 @@
+using Microsoft.AspNetCore.Mvc;
+using PetCare.Application.DTOs.Vendas;
+using PetCare.Application.Services.Interfaces;
+
+namespace PetCare.Web.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class VendasController : ControllerBase
+{
+    private readonly IVendaService _vendaService;
+
+    public VendasController(IVendaService vendaService)
+    {
+        _vendaService = vendaService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Listar()
+    {
+        var vendas = await _vendaService.ListarTodas();
+        return Ok(vendas);
+    }
+
+    [HttpGet("{id:long}")]
+    public async Task<IActionResult> ObterPorId(long id)
+    {
+        var venda = await _vendaService.ObterPorId(id);
+        if (venda is null)
+            return NotFound(new { mensagem = $"Venda com id {id} não encontrada." });
+
+        return Ok(venda);
+    }
+
+    [HttpGet("periodo")]
+    public async Task<IActionResult> ListarPorPeriodo([FromQuery] DateTime inicio, [FromQuery] DateTime fim)
+    {
+        var vendas = await _vendaService.ListarPorPeriodo(inicio, fim);
+        return Ok(vendas);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RealizarVenda([FromBody] VendaCreateDto dto)
+    {
+        try
+        {
+            var venda = await _vendaService.RealizarVenda(dto);
+            return CreatedAtAction(nameof(ObterPorId), new { id = venda.Id }, venda);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return UnprocessableEntity(new { mensagem = ex.Message });
+        }
+    }
+}

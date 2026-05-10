@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using PetCare.Application.DTOs.Tutor;
 using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
@@ -39,5 +40,39 @@ public class TutoresController : ControllerBase
 
         var tutores = await _tutorService.Buscar(termo);
         return Ok(tutores);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Cadastrar([FromBody] TutorCreateDto dto)
+    {
+        try
+        {
+            var tutor = await _tutorService.Cadastrar(dto);
+            return CreatedAtAction(nameof(ObterPorId), new { id = tutor.Id }, tutor);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensagem = ex.Message });
+        }
+    }
+
+    [HttpPut("{id:long}")]
+    public async Task<IActionResult> Atualizar(long id, [FromBody] TutorCreateDto dto)
+    {
+        var atualizado = await _tutorService.Atualizar(id, dto);
+        if (!atualizado)
+            return NotFound(new { mensagem = $"Tutor com id {id} não encontrado." });
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id:long}")]
+    public async Task<IActionResult> Remover(long id)
+    {
+        var removido = await _tutorService.Remover(id);
+        if (!removido)
+            return NotFound(new { mensagem = $"Tutor com id {id} não encontrado." });
+
+        return NoContent();
     }
 }

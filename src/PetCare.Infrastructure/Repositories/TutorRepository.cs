@@ -68,8 +68,8 @@ public class TutorRepository : ITutorRepository
         });
 
         // preenche Id e CreatedAt gerados pelo banco
-        tutor.GetType().GetProperty("Id")!.SetValue(tutor, (long)resultado.id);
-        tutor.GetType().GetProperty("CreatedAt")!.SetValue(tutor, (DateTime)resultado.createdat);
+        tutor.SetId((long)resultado.id);
+        tutor.SetCreatedAt((DateTime)resultado.createdat);
 
         return tutor;
     }
@@ -153,8 +153,8 @@ public class TutorRepository : ITutorRepository
             endereco
         );
 
-        tutor.GetType().GetProperty("Id")!.SetValue(tutor, (long)row.id);
-        tutor.GetType().GetProperty("CreatedAt")!.SetValue(tutor, (DateTime)row.createdat);
+        tutor.SetId((long)row.id);
+        tutor.SetCreatedAt((DateTime)row.createdat);
 
         return tutor;
     }
