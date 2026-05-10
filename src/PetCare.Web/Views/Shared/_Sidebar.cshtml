@@ -1,0 +1,26 @@
+<div class="sidebar-section">Menu</div>
+<a href="/Home/Index" class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "ativo" : "")" id="nav-home">
+    <i class="fas fa-fw fa-house"></i> Início
+</a>
+      
+<div style="margin-top:16px" class="sidebar-section">Meus Módulos</div>
+<a href="/Vendas/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Vendas" ? "ativo" : "")" id="nav-vendas">
+    <i class="fas fa-fw fa-cart-shopping"></i> Vendas
+</a>
+<a href="/Tutores/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Tutores" ? "ativo" : "")" id="nav-tutores">
+    <i class="fas fa-fw fa-users"></i> Tutores
+</a>
+<a href="/Home/Dashboard" class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "ativo" : "")" id="nav-dashboard">
+    <i class="fas fa-fw fa-chart-line"></i> Dashboard
+</a>
+
+<div style="margin-top:16px" class="sidebar-section">Gestão Clínica</div>
+<a href="/Agendamentos/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Agendamentos" ? "ativo" : "")" id="nav-agendamentos">
+    <i class="fas fa-fw fa-calendar-days"></i> Agendamentos
+</a>
+<a href="/Animais/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Animais" ? "ativo" : "")" id="nav-animais">
+    <i class="fas fa-fw fa-paw"></i> Animais
+</a>
+<a href="/Produtos/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Produtos" ? "ativo" : "")" id="nav-estoque">
+    <i class="fas fa-fw fa-boxes-stacked"></i> Estoque
+</a>

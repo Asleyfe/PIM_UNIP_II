@@ -1,5 +1,5 @@
 @{
-    Layout = null; // Login tem seu próprio layout minimalista
+    Layout = null;
 }
 
 <!DOCTYPE html>
@@ -8,111 +8,131 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - PetCare</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome & Bootstrap -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <style>
-        body { background-color: #f8f9fa; display: flex; align-items: center; height: 100vh; }
-        .login-card { width: 100%; max-width: 400px; padding: 30px; margin: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 10px; background: #fff; }
-        .btn-primary { background-color: #0d6efd; border: none; }
-    </style>
+    
+    <!-- CSS Modularizado -->
+    <link rel="stylesheet" href="~/css/base.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components.css" asp-append-version="true" />
 </head>
 <body>
+
+<!-- MODAL ESQUECI SENHA -->
+<div class="modal-overlay" id="modalSenha">
+    <div class="modal-box">
+        <h3><i class="fas fa-key" style="color:var(--verde-d);margin-right:8px"></i>Esqueci minha senha</h3>
+        <p>Digite seu nome de usuário e enviaremos instruções de recuperação para o e-mail cadastrado.</p>
+        <input type="text" placeholder="Seu nome de usuário" id="recNome" />
+        <div class="modal-btns">
+            <button class="modal-btn modal-btn-cancel" onclick="fecharModal()">Cancelar</button>
+            <button class="modal-btn modal-btn-send" onclick="enviarRecuperacao()">Enviar <i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="fas fa-circle-check"></i> <span id="toastMsg">Operação realizada!</span></div>
+
+<!-- TELA LOGIN -->
+<div class="tela ativa" id="tela-login">
+    <div class="login-shapes">
+        <div class="ls ls-1"></div><div class="ls ls-2"></div><div class="ls ls-3"></div>
+    </div>
+    
     <div class="login-card">
-        <h2 class="text-center mb-4">🐾 PetCare</h2>
-        <h5 class="text-center text-muted mb-4">Acesse sua conta</h5>
+        <div class="login-logo">
+            <i class="fas fa-paw"></i>
+            <div class="login-logo-text">Pet<span>Care</span></div>
+        </div>
         
-        <div id="login-alert" class="alert alert-danger d-none"></div>
+        <div class="login-title">Bem-vindo de volta!</div>
+        <div class="login-sub">Faça login para acessar o sistema clínico</div>
+
+        <div class="login-error" id="loginError">
+            <i class="fas fa-circle-exclamation"></i>
+            <span id="loginErrorMessage">Usuário ou senha incorretos.</span>
+        </div>
 
         <form id="login-form">
-            <div class="mb-3">
-                <label for="email" class="form-label">E-mail</label>
-                <input type="email" class="form-control" id="email" required placeholder="seu@email.com">
+            <div class="form-group">
+                <label>E-mail</label>
+                <div class="input-wrap">
+                    <i class="fas fa-user"></i>
+                    <input type="email" id="loginEmail" placeholder="seu@email.com" required />
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Senha</label>
-                <input type="password" class="form-control" id="password" required placeholder="******">
+            
+            <div class="form-group">
+                <label>Senha</label>
+                <div class="input-wrap">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="loginPass" placeholder="••••••••" required />
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary w-100 py-2" id="btn-login">
-                <span id="btn-text">Entrar</span>
+
+            <a class="forgot-link" onclick="abrirModal()">
+                <i class="fas fa-question-circle"></i> Esqueci minha senha
+            </a>
+            
+            <button type="submit" class="btn-login" id="btn-login">
+                <span id="btn-text">Entrar <i class="fas fa-arrow-right-to-bracket"></i></span>
                 <span id="btn-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
             </button>
         </form>
 
-        <div class="mt-3 text-center">
-            <small>Ainda não tem conta? <a href="#" class="text-decoration-none">Contate o administrador</a></small>
+        <div style="text-align:center;margin-top:30px;font-size:.75rem;color:var(--texto-s)">
+            <i class="fas fa-shield-halved" style="color:var(--verde-d)"></i>
+            Acesso restrito — PetCare Goiânia © 2026
         </div>
     </div>
+</div>
 
-    <!-- Supabase JS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@@supabase/supabase-js@2"></script>
-    
-    <script>
-        const supabaseUrl = '@ViewBag.SupabaseUrl';
-        const supabaseKey = '@ViewBag.SupabaseKey';
-        
-        // No SDK v2, o objeto global é 'supabase'
-        let supabaseClient;
-        try {
-            supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        } catch (e) {
-            console.error("Erro ao inicializar Supabase:", e);
-        }
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@@supabase/supabase-js@2"></script>
 
-        const form = document.getElementById('login-form');
-        const alert = document.getElementById('login-alert');
+<script>
+    const supabaseUrl = '@ViewBag.SupabaseUrl';
+    const supabaseKey = '@ViewBag.SupabaseKey';
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+    function abrirModal() { document.getElementById('modalSenha').classList.add('show'); }
+    function fecharModal() { document.getElementById('modalSenha').classList.remove('show'); }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
         const btnLogin = document.getElementById('btn-login');
-        const btnText = document.getElementById('btn-text');
-        const btnSpinner = document.getElementById('btn-spinner');
+        btnLogin.disabled = true;
+        
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPass').value;
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!supabaseClient) {
-                mostrarErro("Erro técnico: SDK do Supabase não carregado.");
-                return;
-            }
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
-            // Limpa alertas e inicia loading
-            alert.classList.add('d-none');
-            btnLogin.disabled = true;
-            btnText.classList.add('d-none');
-            btnSpinner.classList.remove('d-none');
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-                email: email,
-                password: password,
-            });
-
-            if (error) {
-                mostrarErro(error.message);
-            } else {
-                // Login sucesso - Agora buscamos o perfil (Role)
-                const { data: perfil, error: perfilError } = await supabaseClient
-                    .from('perfis')
-                    .select('role')
-                    .eq('id', data.user.id)
-                    .single();
-
-                if (perfilError) {
-                    await supabaseClient.auth.signOut();
-                    mostrarErro("Perfil não encontrado na tabela 'perfis'. Contate o administrador.");
-                } else {
-                    localStorage.setItem('pc_user_role', perfil.role);
-                    localStorage.setItem('pc_user_email', data.user.email);
-                    window.location.href = '/';
-                }
-            }
-        });
-
-        function mostrarErro(mensagem) {
-            alert.textContent = "Erro: " + mensagem;
-            alert.classList.remove('d-none');
+        if (error) {
+            document.getElementById('loginErrorMessage').textContent = error.message;
+            document.getElementById('loginError').classList.add('show');
             btnLogin.disabled = false;
-            btnText.classList.remove('d-none');
-            btnSpinner.classList.add('d-none');
+        } else {
+            localStorage.setItem('pc_user_email', data.user.email);
+            window.location.href = '/Home/Index';
         }
-    </script>
+    });
+
+    function enviarRecuperacao() {
+        fecharModal();
+        const toast = document.getElementById('toast');
+        toast.classList.add('show', 'success');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+</script>
 </body>
 </html>

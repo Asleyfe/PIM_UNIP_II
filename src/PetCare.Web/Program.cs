@@ -5,8 +5,16 @@ using PetCare.Domain.Interfaces.Repositories;
 using PetCare.Infrastructure.Repositories;
 using PetCare.Application.Services.Interfaces;
 using PetCare.Application.Services;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configuração robusta do WebRoot para local e nuvem
+if (string.IsNullOrEmpty(builder.Environment.WebRootPath))
+{
+    builder.Environment.WebRootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+}
 
 // Configuração do Dapper
 DapperSetup.Configure();
@@ -20,7 +28,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<SupabaseSettings>(
     builder.Configuration.GetSection(SupabaseSettings.SectionName));
 
-// Injeção de Dependência - Infra
+// Injeções de Dependência
 builder.Services.AddSingleton<IConnectionFactory, NpgsqlConnectionFactory>();
 builder.Services.AddScoped<ITutorRepository, TutorRepository>();
 builder.Services.AddScoped<IAnimalRepository, AnimalRepository>();
@@ -31,7 +39,6 @@ builder.Services.AddScoped<IMovimentacaoEstoqueRepository, MovimentacaoEstoqueRe
 builder.Services.AddScoped<IProntuarioRepository, ProntuarioRepository>();
 builder.Services.AddScoped<IVendaRepository, VendaRepository>();
 
-// Injeção de Dependência - Application
 builder.Services.AddScoped<ITutorService, TutorService>();
 builder.Services.AddScoped<IAnimalService, AnimalService>();
 builder.Services.AddScoped<IVeterinarioService, VeterinarioService>();
@@ -42,7 +49,8 @@ builder.Services.AddScoped<IVendaService, VendaService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseStaticFiles();
+
 app.UseMiddleware<TratamentoErrosMiddleware>();
 
 if (!app.Environment.IsDevelopment())
@@ -57,15 +65,12 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

@@ -1,8 +1,58 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Início";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="home-welcome">
+    <h1>Bem-vindo ao <span>PetCare</span></h1>
+    <p>Selecione um módulo para acessar o sistema</p>
+</div>
+
+<div class="module-grid">
+    <a href="/Agendamentos/Index" class="module-card">
+        <div class="module-icon orange"><i class="fas fa-calendar-days"></i></div>
+        <div class="module-info">
+            <h3>Agendamentos</h3>
+            <p>Gerencie consultas, retornos e horários da clínica.</p>
+        </div>
+    </a>
+
+    <a href="/Animais/Index" class="module-card">
+        <div class="module-icon green"><i class="fas fa-paw"></i></div>
+        <div class="module-info">
+            <h3>Animais</h3>
+            <p>Cadastre e consulte as informações dos animais atendidos.</p>
+        </div>
+    </a>
+
+    <a href="/Produtos/Index" class="module-card">
+        <div class="module-icon blue"><i class="fas fa-boxes-stacked"></i></div>
+        <div class="module-info">
+            <h3>Estoque</h3>
+            <p>Controle produtos, estoque, validade e movimentações.</p>
+        </div>
+    </a>
+
+    <a href="/Vendas/Index" class="module-card">
+        <div class="module-icon purple"><i class="fas fa-cart-shopping"></i></div>
+        <div class="module-info">
+            <h3>Vendas</h3>
+            <p>Registre vendas de produtos e serviços da clínica.</p>
+        </div>
+    </a>
+
+    <a href="/Home/Dashboard" class="module-card">
+        <div class="module-icon gold"><i class="fas fa-chart-line"></i></div>
+        <div class="module-info">
+            <h3>Dashboard</h3>
+            <p>Acompanhe indicadores, gráficos e desempenho da clínica.</p>
+        </div>
+    </a>
+
+    <a href="/Tutores/Index" class="module-card">
+        <div class="module-icon teal"><i class="fas fa-users"></i></div>
+        <div class="module-info">
+            <h3>Tutores</h3>
+            <p>Cadastre e consulte dados dos tutores e responsáveis.</p>
+        </div>
+    </a>
 </div>
