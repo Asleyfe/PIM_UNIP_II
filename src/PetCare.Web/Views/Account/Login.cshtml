@@ -48,7 +48,14 @@
     <script>
         const supabaseUrl = '@ViewBag.SupabaseUrl';
         const supabaseKey = '@ViewBag.SupabaseKey';
-        const supabaseClient = supabasejs.createClient(supabaseUrl, supabaseKey);
+        
+        // No SDK v2, o objeto global é 'supabase'
+        let supabaseClient;
+        try {
+            supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        } catch (e) {
+            console.error("Erro ao inicializar Supabase:", e);
+        }
 
         const form = document.getElementById('login-form');
         const alert = document.getElementById('login-alert');
@@ -59,6 +66,11 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            if (!supabaseClient) {
+                mostrarErro("Erro técnico: SDK do Supabase não carregado.");
+                return;
+            }
+
             // Limpa alertas e inicia loading
             alert.classList.add('d-none');
             btnLogin.disabled = true;
@@ -84,15 +96,11 @@
                     .single();
 
                 if (perfilError) {
-                    // Se não achar perfil, desloga por segurança ou assume CLIENTE
                     await supabaseClient.auth.signOut();
                     mostrarErro("Perfil não encontrado na tabela 'perfis'. Contate o administrador.");
                 } else {
-                    // Salva dados essenciais para o Front-end
                     localStorage.setItem('pc_user_role', perfil.role);
                     localStorage.setItem('pc_user_email', data.user.email);
-                    
-                    // Redireciona para a Home
                     window.location.href = '/';
                 }
             }
