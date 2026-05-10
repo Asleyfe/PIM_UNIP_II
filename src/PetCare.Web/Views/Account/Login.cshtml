@@ -1,0 +1,110 @@
+@{
+    Layout = null; // Login tem seu próprio layout minimalista
+}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - PetCare</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body { background-color: #f8f9fa; display: flex; align-items: center; height: 100vh; }
+        .login-card { width: 100%; max-width: 400px; padding: 30px; margin: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 10px; background: #fff; }
+        .btn-primary { background-color: #0d6efd; border: none; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2 class="text-center mb-4">🐾 PetCare</h2>
+        <h5 class="text-center text-muted mb-4">Acesse sua conta</h5>
+        
+        <div id="login-alert" class="alert alert-danger d-none"></div>
+
+        <form id="login-form">
+            <div class="mb-3">
+                <label for="email" class="form-label">E-mail</label>
+                <input type="email" class="form-control" id="email" required placeholder="seu@email.com">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" class="form-control" id="password" required placeholder="******">
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2" id="btn-login">
+                <span id="btn-text">Entrar</span>
+                <span id="btn-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+            </button>
+        </form>
+
+        <div class="mt-3 text-center">
+            <small>Ainda não tem conta? <a href="#" class="text-decoration-none">Contate o administrador</a></small>
+        </div>
+    </div>
+
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@@supabase/supabase-js@2"></script>
+    
+    <script>
+        const supabaseUrl = '@ViewBag.SupabaseUrl';
+        const supabaseKey = '@ViewBag.SupabaseKey';
+        const supabaseClient = supabasejs.createClient(supabaseUrl, supabaseKey);
+
+        const form = document.getElementById('login-form');
+        const alert = document.getElementById('login-alert');
+        const btnLogin = document.getElementById('btn-login');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Limpa alertas e inicia loading
+            alert.classList.add('d-none');
+            btnLogin.disabled = true;
+            btnText.classList.add('d-none');
+            btnSpinner.classList.remove('d-none');
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                mostrarErro(error.message);
+            } else {
+                // Login sucesso - Agora buscamos o perfil (Role)
+                const { data: perfil, error: perfilError } = await supabaseClient
+                    .from('perfis')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (perfilError) {
+                    // Se não achar perfil, desloga por segurança ou assume CLIENTE
+                    await supabaseClient.auth.signOut();
+                    mostrarErro("Perfil não encontrado na tabela 'perfis'. Contate o administrador.");
+                } else {
+                    // Salva dados essenciais para o Front-end
+                    localStorage.setItem('pc_user_role', perfil.role);
+                    localStorage.setItem('pc_user_email', data.user.email);
+                    
+                    // Redireciona para a Home
+                    window.location.href = '/';
+                }
+            }
+        });
+
+        function mostrarErro(mensagem) {
+            alert.textContent = "Erro: " + mensagem;
+            alert.classList.remove('d-none');
+            btnLogin.disabled = false;
+            btnText.classList.remove('d-none');
+            btnSpinner.classList.add('d-none');
+        }
+    </script>
+</body>
+</html>

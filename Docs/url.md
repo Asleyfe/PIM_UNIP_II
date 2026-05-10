@@ -1,0 +1,2 @@
+URL:https://qjyrwloonkjzjwmbtxos.supabase.co/rest/v1/
+ano/public: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqeXJ3bG9vbmtqemp3bWJ0eG9zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5MzQzMTcsImV4cCI6MjA5MzUxMDMxN30.nL7v73jhSAv1p8Nn72bLRWfGUTiiRaNx46Wqjc--yjE

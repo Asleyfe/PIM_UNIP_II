@@ -11,4 +11,10 @@ public class SupabaseSettings
 
     /// <summary>Connection string completa no formato Npgsql.</summary>
     public string ConnectionString { get; set; } = string.Empty;
+
+    /// <summary>URL do projeto Supabase.</summary>
+    public string Url { get; set; } = string.Empty;
+
+    /// <summary>Chave pública anon do Supabase.</summary>
+    public string AnonKey { get; set; } = string.Empty;
 }
