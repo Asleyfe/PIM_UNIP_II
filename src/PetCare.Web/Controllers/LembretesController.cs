@@ -4,9 +4,8 @@ using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class LembretesController : ControllerBase
+[Route("Lembretes")]
+public class LembretesController : Controller
 {
     private readonly ILembreteService _lembreteService;
 
@@ -16,20 +15,26 @@ public class LembretesController : ControllerBase
     }
 
     [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [HttpGet("/api/Lembretes")]
     public async Task<IActionResult> Listar()
     {
         var lembretes = await _lembreteService.ListarTodos();
         return Ok(lembretes);
     }
 
-    [HttpGet("tutor/{tutorId:long}")]
+    [HttpGet("/api/Lembretes/tutor/{tutorId:long}")]
     public async Task<IActionResult> ListarPorTutor(long tutorId)
     {
         var lembretes = await _lembreteService.ListarPorTutor(tutorId);
         return Ok(lembretes);
     }
 
-    [HttpPost]
+    [HttpPost("/api/Lembretes")]
     public async Task<IActionResult> RegistrarEnvio([FromBody] LembreteCreateDto dto)
     {
         try
@@ -43,7 +48,7 @@ public class LembretesController : ControllerBase
         }
     }
 
-    [HttpPatch("{id:long}/status")]
+    [HttpPatch("/api/Lembretes/{id:long}/status")]
     public async Task<IActionResult> AtualizarStatus(long id, [FromQuery] string status)
     {
         try

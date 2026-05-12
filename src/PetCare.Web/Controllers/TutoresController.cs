@@ -4,9 +4,8 @@ using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class TutoresController : ControllerBase
+[Route("Tutores")]
+public class TutoresController : Controller
 {
     private readonly ITutorService _tutorService;
 
@@ -16,13 +15,25 @@ public class TutoresController : ControllerBase
     }
 
     [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [HttpGet("Cadastro")]
+    public IActionResult Cadastro()
+    {
+        return View();
+    }
+
+    [HttpGet("/api/Tutores")]
     public async Task<IActionResult> Listar()
     {
         var tutores = await _tutorService.ListarTodos();
         return Ok(tutores);
     }
 
-    [HttpGet("{id:long}")]
+    [HttpGet("/api/Tutores/{id:long}")]
     public async Task<IActionResult> ObterPorId(long id)
     {
         var tutor = await _tutorService.ObterPorId(id);
@@ -32,7 +43,7 @@ public class TutoresController : ControllerBase
         return Ok(tutor);
     }
 
-    [HttpGet("buscar")]
+    [HttpGet("/api/Tutores/buscar")]
     public async Task<IActionResult> Buscar([FromQuery] string termo)
     {
         if (string.IsNullOrWhiteSpace(termo))
@@ -42,7 +53,7 @@ public class TutoresController : ControllerBase
         return Ok(tutores);
     }
 
-    [HttpPost]
+    [HttpPost("/api/Tutores")]
     public async Task<IActionResult> Cadastrar([FromBody] TutorCreateDto dto)
     {
         try
@@ -56,7 +67,7 @@ public class TutoresController : ControllerBase
         }
     }
 
-    [HttpPut("{id:long}")]
+    [HttpPut("/api/Tutores/{id:long}")]
     public async Task<IActionResult> Atualizar(long id, [FromBody] TutorCreateDto dto)
     {
         var atualizado = await _tutorService.Atualizar(id, dto);
@@ -66,7 +77,7 @@ public class TutoresController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id:long}")]
+    [HttpDelete("/api/Tutores/{id:long}")]
     public async Task<IActionResult> Remover(long id)
     {
         var removido = await _tutorService.Remover(id);

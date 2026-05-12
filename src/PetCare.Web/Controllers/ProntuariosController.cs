@@ -4,9 +4,8 @@ using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class ProntuariosController : ControllerBase
+[Route("Prontuarios")]
+public class ProntuariosController : Controller
 {
     private readonly IProntuarioService _prontuarioService;
 
@@ -15,7 +14,19 @@ public class ProntuariosController : ControllerBase
         _prontuarioService = prontuarioService;
     }
 
-    [HttpGet("{id:long}")]
+    [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [HttpGet("Registro")]
+    public IActionResult Registro()
+    {
+        return View();
+    }
+
+    [HttpGet("/api/Prontuarios/{id:long}")]
     public async Task<IActionResult> ObterPorId(long id)
     {
         var prontuario = await _prontuarioService.ObterPorId(id);
@@ -25,7 +36,7 @@ public class ProntuariosController : ControllerBase
         return Ok(prontuario);
     }
 
-    [HttpGet("agendamento/{agendamentoId:long}")]
+    [HttpGet("/api/Prontuarios/agendamento/{agendamentoId:long}")]
     public async Task<IActionResult> ObterPorAgendamento(long agendamentoId)
     {
         var prontuario = await _prontuarioService.ObterPorAgendamento(agendamentoId);
@@ -35,7 +46,7 @@ public class ProntuariosController : ControllerBase
         return Ok(prontuario);
     }
 
-    [HttpPost]
+    [HttpPost("/api/Prontuarios")]
     public async Task<IActionResult> Registrar([FromBody] ProntuarioCreateDto dto)
     {
         try
@@ -53,7 +64,7 @@ public class ProntuariosController : ControllerBase
         }
     }
 
-    [HttpPut("{id:long}")]
+    [HttpPut("/api/Prontuarios/{id:long}")]
     public async Task<IActionResult> Atualizar(long id, [FromBody] ProntuarioCreateDto dto)
     {
         var atualizado = await _prontuarioService.Atualizar(id, dto);

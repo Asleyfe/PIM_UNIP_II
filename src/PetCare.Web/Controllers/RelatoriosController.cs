@@ -3,9 +3,8 @@ using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class RelatoriosController : ControllerBase
+[Route("Relatorios")]
+public class RelatoriosController : Controller
 {
     private readonly IRelatorioService _relatorioService;
 
@@ -14,7 +13,13 @@ public class RelatoriosController : ControllerBase
         _relatorioService = relatorioService;
     }
 
-    [HttpGet("faturamento")]
+    [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [HttpGet("/api/Relatorios/faturamento")]
     public async Task<IActionResult> ObterFaturamento([FromQuery] DateTime inicio, [FromQuery] DateTime fim)
     {
         if (inicio == default) inicio = DateTime.UtcNow.AddMonths(-1);
@@ -24,7 +29,7 @@ public class RelatoriosController : ControllerBase
         return Ok(relatorio);
     }
 
-    [HttpGet("desempenho-profissionais")]
+    [HttpGet("/api/Relatorios/desempenho-profissionais")]
     public async Task<IActionResult> ObterDesempenhoProfissionais([FromQuery] DateTime inicio, [FromQuery] DateTime fim)
     {
         if (inicio == default) inicio = DateTime.UtcNow.AddMonths(-1);
@@ -34,7 +39,7 @@ public class RelatoriosController : ControllerBase
         return Ok(relatorio);
     }
 
-    [HttpGet("produtos-mais-vendidos")]
+    [HttpGet("/api/Relatorios/produtos-mais-vendidos")]
     public async Task<IActionResult> ObterProdutosMaisVendidos([FromQuery] DateTime inicio, [FromQuery] DateTime fim, [FromQuery] int top = 10)
     {
         if (inicio == default) inicio = DateTime.UtcNow.AddMonths(-1);

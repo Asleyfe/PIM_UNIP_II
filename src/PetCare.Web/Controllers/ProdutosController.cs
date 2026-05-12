@@ -4,9 +4,8 @@ using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class ProdutosController : ControllerBase
+[Route("Estoque")]
+public class ProdutosController : Controller
 {
     private readonly IEstoqueService _estoqueService;
 
@@ -16,13 +15,19 @@ public class ProdutosController : ControllerBase
     }
 
     [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [HttpGet("/api/Produtos")]
     public async Task<IActionResult> Listar()
     {
         var produtos = await _estoqueService.ListarTodosProdutos();
         return Ok(produtos);
     }
 
-    [HttpGet("{id:long}")]
+    [HttpGet("/api/Produtos/{id:long}")]
     public async Task<IActionResult> ObterPorId(long id)
     {
         var produto = await _estoqueService.ObterProdutoPorId(id);
@@ -32,7 +37,7 @@ public class ProdutosController : ControllerBase
         return Ok(produto);
     }
 
-    [HttpPost]
+    [HttpPost("/api/Produtos")]
     public async Task<IActionResult> Cadastrar([FromBody] ProdutoCreateDto dto)
     {
         try
@@ -46,7 +51,7 @@ public class ProdutosController : ControllerBase
         }
     }
 
-    [HttpPut("{id:long}")]
+    [HttpPut("/api/Produtos/{id:long}")]
     public async Task<IActionResult> Atualizar(long id, [FromBody] ProdutoCreateDto dto)
     {
         var atualizado = await _estoqueService.AtualizarProduto(id, dto);
@@ -56,7 +61,7 @@ public class ProdutosController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id:long}")]
+    [HttpDelete("/api/Produtos/{id:long}")]
     public async Task<IActionResult> Remover(long id)
     {
         var removido = await _estoqueService.RemoverProduto(id);
@@ -66,21 +71,21 @@ public class ProdutosController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("estoque-baixo")]
+    [HttpGet("/api/Produtos/estoque-baixo")]
     public async Task<IActionResult> ListarEstoqueBaixo()
     {
         var produtos = await _estoqueService.ListarProdutosEstoqueBaixo();
         return Ok(produtos);
     }
 
-    [HttpGet("vencendo")]
+    [HttpGet("/api/Produtos/vencendo")]
     public async Task<IActionResult> ListarVencendo()
     {
         var produtos = await _estoqueService.ListarProdutosVencendo();
         return Ok(produtos);
     }
 
-    [HttpPost("{id:long}/movimentacao")]
+    [HttpPost("/api/Produtos/{id:long}/movimentacao")]
     public async Task<IActionResult> RegistrarMovimentacao(long id, [FromBody] MovimentacaoRequest request)
     {
         try
@@ -97,7 +102,7 @@ public class ProdutosController : ControllerBase
         }
     }
 
-    [HttpGet("{id:long}/movimentacoes")]
+    [HttpGet("/api/Produtos/{id:long}/movimentacoes")]
     public async Task<IActionResult> ListarMovimentacoes(long id)
     {
         var movs = await _estoqueService.ListarMovimentacoesPorProduto(id);

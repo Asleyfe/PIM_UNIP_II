@@ -10,6 +10,7 @@ public class AgendamentoResponseDto
     public long VeterinarioId { get; set; }
     public string VeterinarioNome { get; set; } = string.Empty;
     public DateTime DataHoraConsulta { get; set; }
+    public decimal Preco { get; set; }
     public string Status { get; set; } = string.Empty;
     public string? Observacao { get; set; }
     public DateTime CreatedAt { get; set; }

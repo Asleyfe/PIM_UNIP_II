@@ -4,9 +4,8 @@ using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class VendasController : ControllerBase
+[Route("Vendas")]
+public class VendasController : Controller
 {
     private readonly IVendaService _vendaService;
 
@@ -16,13 +15,19 @@ public class VendasController : ControllerBase
     }
 
     [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [HttpGet("/api/Vendas")]
     public async Task<IActionResult> Listar()
     {
         var vendas = await _vendaService.ListarTodas();
         return Ok(vendas);
     }
 
-    [HttpGet("{id:long}")]
+    [HttpGet("/api/Vendas/{id:long}")]
     public async Task<IActionResult> ObterPorId(long id)
     {
         var venda = await _vendaService.ObterPorId(id);
@@ -32,14 +37,14 @@ public class VendasController : ControllerBase
         return Ok(venda);
     }
 
-    [HttpGet("periodo")]
+    [HttpGet("/api/Vendas/periodo")]
     public async Task<IActionResult> ListarPorPeriodo([FromQuery] DateTime inicio, [FromQuery] DateTime fim)
     {
         var vendas = await _vendaService.ListarPorPeriodo(inicio, fim);
         return Ok(vendas);
     }
 
-    [HttpPost]
+    [HttpPost("/api/Vendas")]
     public async Task<IActionResult> RealizarVenda([FromBody] VendaCreateDto dto)
     {
         try

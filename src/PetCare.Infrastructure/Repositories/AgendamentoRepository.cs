@@ -19,7 +19,7 @@ public class AgendamentoRepository : IAgendamentoRepository
     {
         const string sql = """
             SELECT id, tutor_id AS TutorId, animal_id AS AnimalId, 
-                   veterinario_id AS VeterinarioId, datahora_consulta AS DataHoraConsulta,
+                   veterinario_id AS VeterinarioId, preco, datahora_consulta AS DataHoraConsulta,
                    status, observacao, created_at AS CreatedAt
             FROM agendamento
             WHERE id = @Id
@@ -34,7 +34,7 @@ public class AgendamentoRepository : IAgendamentoRepository
     {
         const string sql = """
             SELECT id, tutor_id AS TutorId, animal_id AS AnimalId, 
-                   veterinario_id AS VeterinarioId, datahora_consulta AS DataHoraConsulta,
+                   veterinario_id AS VeterinarioId, preco, datahora_consulta AS DataHoraConsulta,
                    status, observacao, created_at AS CreatedAt
             FROM agendamento
             ORDER BY datahora_consulta DESC
@@ -48,8 +48,8 @@ public class AgendamentoRepository : IAgendamentoRepository
     public async Task<Agendamento> Inserir(Agendamento agendamento)
     {
         const string sql = """
-            INSERT INTO agendamento (tutor_id, animal_id, veterinario_id, datahora_consulta, status, observacao)
-            VALUES (@TutorId, @AnimalId, @VeterinarioId, @DataHoraConsulta, @Status, @Observacao)
+            INSERT INTO agendamento (tutor_id, animal_id, veterinario_id, preco, datahora_consulta, status, observacao)
+            VALUES (@TutorId, @AnimalId, @VeterinarioId, @Preco, @DataHoraConsulta, @Status, @Observacao)
             RETURNING id, created_at AS CreatedAt
             """;
 
@@ -59,6 +59,7 @@ public class AgendamentoRepository : IAgendamentoRepository
             agendamento.TutorId,
             agendamento.AnimalId,
             agendamento.VeterinarioId,
+            agendamento.Preco,
             agendamento.DataHoraConsulta,
             Status = agendamento.Status.ToString(),
             agendamento.Observacao
@@ -75,7 +76,8 @@ public class AgendamentoRepository : IAgendamentoRepository
         const string sql = """
             UPDATE agendamento
             SET tutor_id = @TutorId, animal_id = @AnimalId, 
-                veterinario_id = @VeterinarioId, datahora_consulta = @DataHoraConsulta,
+                veterinario_id = @VeterinarioId, preco = @Preco, 
+                datahora_consulta = @DataHoraConsulta,
                 status = @Status, observacao = @Observacao
             WHERE id = @Id
             """;
@@ -87,6 +89,7 @@ public class AgendamentoRepository : IAgendamentoRepository
             agendamento.TutorId,
             agendamento.AnimalId,
             agendamento.VeterinarioId,
+            agendamento.Preco,
             agendamento.DataHoraConsulta,
             Status = agendamento.Status.ToString(),
             agendamento.Observacao
@@ -129,7 +132,7 @@ public class AgendamentoRepository : IAgendamentoRepository
         // No PostgreSQL, comparamos a data convertida para o fuso de Goiânia (UTC-3)
         const string sql = """
             SELECT id, tutor_id AS TutorId, animal_id AS AnimalId, 
-                   veterinario_id AS VeterinarioId, datahora_consulta AS DataHoraConsulta,
+                   veterinario_id AS VeterinarioId, preco, datahora_consulta AS DataHoraConsulta,
                    status, observacao, created_at AS CreatedAt
             FROM agendamento
             WHERE (datahora_consulta AT TIME ZONE 'UTC' AT TIME ZONE 'America/Sao_Paulo')::date = @DataLocal
@@ -143,15 +146,12 @@ public class AgendamentoRepository : IAgendamentoRepository
 
     private static Agendamento MapearAgendamento(dynamic row)
     {
-        // Instancia via reflexão para preencher os campos private setters
-        // Ou usando o construtor que aceita os parâmetros, mas o status e observação
-        // precisam ser ajustados após a criação se não forem o padrão.
-        
         var agendamento = new Agendamento(
             (long)row.tutorid,
             (long)row.animalid,
             (long)row.veterinarioid,
             (DateTime)row.datahoraconsulta,
+            (decimal)row.preco,
             (string?)row.observacao
         );
 
@@ -161,7 +161,6 @@ public class AgendamentoRepository : IAgendamentoRepository
         // Ajusta o status que vem do banco
         if (Enum.TryParse<StatusAgendamento>((string)row.status, true, out var status))
         {
-            // Como StatusAgendamento é private set, usamos reflexão para o mapeamento
             agendamento.GetType().GetProperty("Status")!.SetValue(agendamento, status);
         }
 

@@ -10,6 +10,7 @@ CREATE TABLE public.agendamento (
   status character varying DEFAULT 'AGENDADO'::character varying CHECK (status::text = ANY (ARRAY['AGENDADO'::character varying, 'CANCELADO'::character varying, 'CONCLUIDO'::character varying]::text[])),
   observacao character varying,
   data_criacao timestamp without time zone DEFAULT now(),
+  preco numeric(10, 2) NULL,
   CONSTRAINT agendamento_pkey PRIMARY KEY (id),
   CONSTRAINT agendamento_tutor_id_fkey FOREIGN KEY (tutor_id) REFERENCES public.tutor(id),
   CONSTRAINT agendamento_animal_id_fkey FOREIGN KEY (animal_id) REFERENCES public.animal(id),

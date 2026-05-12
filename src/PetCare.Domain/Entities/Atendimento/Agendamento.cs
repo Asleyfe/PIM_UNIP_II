@@ -1,4 +1,4 @@
-﻿using PetCare.Domain.Entities.Base;
+using PetCare.Domain.Entities.Base;
 using PetCare.Domain.Enums;
 using PetCare.Domain.Exceptions;
 
@@ -21,6 +21,11 @@ public class Agendamento : EntidadeBase
     public long VeterinarioId { get; private set; }
 
     /// <summary>
+    /// Valor da consulta ou procedimento agendado.
+    /// </summary>
+    public decimal Preco { get; private set; }
+
+    /// <summary>
     /// Data e hora da consulta, sempre em UTC.
     /// Espelha datahora_consulta (timestamptz) no banco.
     /// </summary>
@@ -39,6 +44,7 @@ public class Agendamento : EntidadeBase
     {
         Status = StatusAgendamento.AGENDADO;
         Observacao = null;
+        Preco = 0;
     }
 
     /// <summary>
@@ -52,11 +58,13 @@ public class Agendamento : EntidadeBase
         long animalId,
         long veterinarioId,
         DateTime dataHoraConsulta,
+        decimal preco,
         string? observacao = null)
     {
         ValidarId(tutorId, nameof(tutorId));
         ValidarId(animalId, nameof(animalId));
         ValidarId(veterinarioId, nameof(veterinarioId));
+        ValidarPreco(preco);
 
         var dataHoraUtc = NormalizarParaUtc(dataHoraConsulta);
         ValidarDataHoraNaoPassada(dataHoraUtc);
@@ -66,6 +74,7 @@ public class Agendamento : EntidadeBase
         AnimalId = animalId;
         VeterinarioId = veterinarioId;
         DataHoraConsulta = dataHoraUtc;
+        Preco = preco;
         Status = StatusAgendamento.AGENDADO;
         Observacao = observacao?.Trim();
     }
@@ -122,6 +131,15 @@ public class Agendamento : EntidadeBase
         Observacao = novaObservacao?.Trim();
     }
 
+    /// <summary>
+    /// Atualiza o preço do agendamento.
+    /// </summary>
+    public void AtualizarPreco(decimal novoPreco)
+    {
+        ValidarPreco(novoPreco);
+        Preco = novoPreco;
+    }
+
     // =========================================================================
     // VALIDAÇÕES E NORMALIZAÇÕES PRIVADAS
     // =========================================================================
@@ -154,5 +172,11 @@ public class Agendamento : EntidadeBase
     {
         if (observacao is not null && observacao.Trim().Length > 255)
             throw new DominioException("Observação deve ter no máximo 255 caracteres.");
+    }
+
+    private static void ValidarPreco(decimal preco)
+    {
+        if (preco < 0)
+            throw new DominioException("O preço não pode ser negativo.");
     }
 }

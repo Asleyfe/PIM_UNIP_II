@@ -4,9 +4,8 @@ using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class AnimaisController : ControllerBase
+[Route("Animais")]
+public class AnimaisController : Controller
 {
     private readonly IAnimalService _animalService;
 
@@ -16,13 +15,25 @@ public class AnimaisController : ControllerBase
     }
 
     [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [HttpGet("Cadastro")]
+    public IActionResult Cadastro()
+    {
+        return View();
+    }
+
+    [HttpGet("/api/Animais")]
     public async Task<IActionResult> Listar()
     {
         var animais = await _animalService.ListarTodos();
         return Ok(animais);
     }
 
-    [HttpGet("{id:long}")]
+    [HttpGet("/api/Animais/{id:long}")]
     public async Task<IActionResult> ObterPorId(long id)
     {
         var animal = await _animalService.ObterPorId(id);
@@ -32,14 +43,14 @@ public class AnimaisController : ControllerBase
         return Ok(animal);
     }
 
-    [HttpGet("tutor/{tutorId:long}")]
+    [HttpGet("/api/Animais/tutor/{tutorId:long}")]
     public async Task<IActionResult> ListarPorTutor(long tutorId)
     {
         var animais = await _animalService.ObterPorTutor(tutorId);
         return Ok(animais);
     }
 
-    [HttpPost]
+    [HttpPost("/api/Animais")]
     public async Task<IActionResult> Cadastrar([FromBody] AnimalCreateDto dto)
     {
         try
@@ -53,7 +64,7 @@ public class AnimaisController : ControllerBase
         }
     }
 
-    [HttpDelete("{id:long}")]
+    [HttpDelete("/api/Animais/{id:long}")]
     public async Task<IActionResult> Remover(long id)
     {
         var removido = await _animalService.Remover(id);

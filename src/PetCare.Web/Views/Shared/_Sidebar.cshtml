@@ -1,26 +1,32 @@
 <div class="sidebar-section">Menu</div>
-<a href="/Home/Index" class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "ativo" : "")" id="nav-home">
+<a href="/" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "ativo" : "")" id="nav-home">
     <i class="fas fa-fw fa-house"></i> Início
+</a>
+<a href="/Dashboard" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "ativo" : "")" id="nav-dashboard">
+    <i class="fas fa-fw fa-chart-line"></i> Dashboard
 </a>
       
 <div style="margin-top:16px" class="sidebar-section">Meus Módulos</div>
-<a href="/Vendas/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Vendas" ? "ativo" : "")" id="nav-vendas">
+<a href="/Vendas" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Vendas" ? "ativo" : "")" id="nav-vendas">
     <i class="fas fa-fw fa-cart-shopping"></i> Vendas
 </a>
-<a href="/Tutores/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Tutores" ? "ativo" : "")" id="nav-tutores">
+<a href="/Tutores" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Tutores" ? "ativo" : "")" id="nav-tutores">
     <i class="fas fa-fw fa-users"></i> Tutores
 </a>
-<a href="/Home/Dashboard" class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Dashboard" ? "ativo" : "")" id="nav-dashboard">
-    <i class="fas fa-fw fa-chart-line"></i> Dashboard
+<a href="/Estoque" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Produtos" ? "ativo" : "")" id="nav-estoque">
+    <i class="fas fa-fw fa-boxes-stacked"></i> Estoque
 </a>
 
 <div style="margin-top:16px" class="sidebar-section">Gestão Clínica</div>
-<a href="/Agendamentos/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Agendamentos" ? "ativo" : "")" id="nav-agendamentos">
+<a href="/Agendamentos" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Agendamentos" ? "ativo" : "")" id="nav-agendamentos">
     <i class="fas fa-fw fa-calendar-days"></i> Agendamentos
 </a>
-<a href="/Animais/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Animais" ? "ativo" : "")" id="nav-animais">
+<a href="/Animais" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Animais" ? "ativo" : "")" id="nav-animais">
     <i class="fas fa-fw fa-paw"></i> Animais
 </a>
-<a href="/Produtos/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Produtos" ? "ativo" : "")" id="nav-estoque">
-    <i class="fas fa-fw fa-boxes-stacked"></i> Estoque
+<a href="/Prontuarios" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Prontuarios" ? "ativo" : "")" id="nav-prontuarios">
+    <i class="fas fa-fw fa-notes-medical"></i> Prontuários
+</a>
+<a href="/Relatorios" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Relatorios" ? "ativo" : "")" id="nav-relatorios">
+    <i class="fas fa-fw fa-file-invoice-dollar"></i> Relatórios
 </a>

@@ -4,9 +4,8 @@ using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class VeterinariosController : ControllerBase
+[Route("Veterinarios")]
+public class VeterinariosController : Controller
 {
     private readonly IVeterinarioService _veterinarioService;
 
@@ -16,13 +15,19 @@ public class VeterinariosController : ControllerBase
     }
 
     [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [HttpGet("/api/Veterinarios")]
     public async Task<IActionResult> Listar()
     {
         var veterinarios = await _veterinarioService.ListarTodos();
         return Ok(veterinarios);
     }
 
-    [HttpGet("{id:long}")]
+    [HttpGet("/api/Veterinarios/{id:long}")]
     public async Task<IActionResult> ObterPorId(long id)
     {
         var veterinario = await _veterinarioService.ObterPorId(id);
@@ -32,7 +37,7 @@ public class VeterinariosController : ControllerBase
         return Ok(veterinario);
     }
 
-    [HttpPost]
+    [HttpPost("/api/Veterinarios")]
     public async Task<IActionResult> Cadastrar([FromBody] VeterinarioCreateDto dto)
     {
         try
@@ -46,7 +51,7 @@ public class VeterinariosController : ControllerBase
         }
     }
 
-    [HttpPut("{id:long}")]
+    [HttpPut("/api/Veterinarios/{id:long}")]
     public async Task<IActionResult> Atualizar(long id, [FromBody] VeterinarioCreateDto dto)
     {
         var atualizado = await _veterinarioService.Atualizar(id, dto);
@@ -56,7 +61,7 @@ public class VeterinariosController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id:long}")]
+    [HttpDelete("/api/Veterinarios/{id:long}")]
     public async Task<IActionResult> Remover(long id)
     {
         var removido = await _veterinarioService.Remover(id);

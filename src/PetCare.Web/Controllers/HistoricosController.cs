@@ -3,10 +3,8 @@ using PetCare.Application.DTOs.Atendimento;
 using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class HistoricosController : ControllerBase
+[Route("Historico")]
+public class HistoricosController : Controller
 {
     private readonly IHistoricoService _historicoService;
 
@@ -15,14 +13,21 @@ public class HistoricosController : ControllerBase
         _historicoService = historicoService;
     }
 
-    [HttpGet("animal/{animalId:long}")]
+    [HttpGet("Animal/{animalId:long}")]
+    public IActionResult Index(long animalId)
+    {
+        ViewBag.AnimalId = animalId;
+        return View();
+    }
+
+    [HttpGet("/api/Historico/animal/{animalId:long}")]
     public async Task<IActionResult> ListarPorAnimal(long animalId)
     {
         var historicos = await _historicoService.ListarPorAnimal(animalId);
         return Ok(historicos);
     }
 
-    [HttpPost]
+    [HttpPost("/api/Historico")]
     public async Task<IActionResult> Registrar([FromBody] HistoricoClinicoCreateDto dto)
     {
         try
@@ -36,7 +41,7 @@ public class HistoricosController : ControllerBase
         }
     }
 
-    [HttpDelete("{id:long}")]
+    [HttpDelete("/api/Historico/{id:long}")]
     public async Task<IActionResult> Remover(long id)
     {
         var removido = await _historicoService.Remover(id);

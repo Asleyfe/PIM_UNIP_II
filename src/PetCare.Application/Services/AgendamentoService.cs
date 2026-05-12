@@ -67,6 +67,7 @@ public class AgendamentoService : IAgendamentoService
             dto.AnimalId,
             dto.VeterinarioId,
             dto.DataHoraConsulta,
+            dto.Preco,
             dto.Observacao
         );
 
@@ -121,6 +122,7 @@ public class AgendamentoService : IAgendamentoService
             VeterinarioId = a.VeterinarioId,
             VeterinarioNome = veterinario?.Nome ?? "N/A",
             DataHoraConsulta = a.DataHoraConsulta,
+            Preco = a.Preco,
             Status = a.Status.ToString(),
             Observacao = a.Observacao,
             CreatedAt = a.CreatedAt

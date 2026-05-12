@@ -4,9 +4,8 @@ using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class AgendamentosController : ControllerBase
+[Route("Agendamentos")]
+public class AgendamentosController : Controller
 {
     private readonly IAgendamentoService _agendamentoService;
 
@@ -16,13 +15,25 @@ public class AgendamentosController : ControllerBase
     }
 
     [HttpGet]
+    public IActionResult Index()
+    {
+        return View();
+    }
+
+    [HttpGet("Novo")]
+    public IActionResult Novo()
+    {
+        return View();
+    }
+
+    [HttpGet("/api/Agendamentos")]
     public async Task<IActionResult> Listar()
     {
         var agendamentos = await _agendamentoService.ListarTodos();
         return Ok(agendamentos);
     }
 
-    [HttpGet("{id:long}")]
+    [HttpGet("/api/Agendamentos/{id:long}")]
     public async Task<IActionResult> ObterPorId(long id)
     {
         var agendamento = await _agendamentoService.ObterPorId(id);
@@ -32,7 +43,7 @@ public class AgendamentosController : ControllerBase
         return Ok(agendamento);
     }
 
-    [HttpGet("agenda-dia")]
+    [HttpGet("/api/Agendamentos/agenda-dia")]
     public async Task<IActionResult> ListarAgendaDoDia([FromQuery] string data)
     {
         if (!DateOnly.TryParse(data, out var dateOnly))
@@ -42,7 +53,7 @@ public class AgendamentosController : ControllerBase
         return Ok(agenda);
     }
 
-    [HttpPost]
+    [HttpPost("/api/Agendamentos")]
     public async Task<IActionResult> Agendar([FromBody] AgendamentoCreateDto dto)
     {
         try
@@ -56,7 +67,7 @@ public class AgendamentosController : ControllerBase
         }
     }
 
-    [HttpPatch("{id:long}/cancelar")]
+    [HttpPatch("/api/Agendamentos/{id:long}/cancelar")]
     public async Task<IActionResult> Cancelar(long id)
     {
         var cancelado = await _agendamentoService.Cancelar(id);
@@ -66,7 +77,7 @@ public class AgendamentosController : ControllerBase
         return NoContent();
     }
 
-    [HttpPatch("{id:long}/concluir")]
+    [HttpPatch("/api/Agendamentos/{id:long}/concluir")]
     public async Task<IActionResult> Concluir(long id)
     {
         var concluido = await _agendamentoService.Concluir(id);
@@ -76,7 +87,7 @@ public class AgendamentosController : ControllerBase
         return NoContent();
     }
 
-    [HttpPatch("{id:long}/reagendar")]
+    [HttpPatch("/api/Agendamentos/{id:long}/reagendar")]
     public async Task<IActionResult> Reagendar(long id, [FromBody] DateTime novaDataHora)
     {
         try
