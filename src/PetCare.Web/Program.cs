@@ -39,6 +39,8 @@ builder.Services.AddScoped<IMovimentacaoEstoqueRepository, MovimentacaoEstoqueRe
 builder.Services.AddScoped<IProntuarioRepository, ProntuarioRepository>();
 builder.Services.AddScoped<IVendaRepository, VendaRepository>();
 builder.Services.AddScoped<ILembreteRepository, LembreteRepository>();
+builder.Services.AddScoped<IRelatorioRepository, RelatorioRepository>();
+builder.Services.AddScoped<IHistoricoRepository, HistoricoRepository>();
 
 builder.Services.AddScoped<ITutorService, TutorService>();
 builder.Services.AddScoped<IAnimalService, AnimalService>();
@@ -49,6 +51,8 @@ builder.Services.AddScoped<IProntuarioService, ProntuarioService>();
 builder.Services.AddScoped<IVendaService, VendaService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<ILembreteService, LembreteService>();
+builder.Services.AddScoped<IRelatorioService, RelatorioService>();
+builder.Services.AddScoped<IHistoricoService, HistoricoService>();
 
 var app = builder.Build();
 
