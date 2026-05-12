@@ -1,11 +1,11 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using PetCare.Domain.Exceptions;
 
 namespace PetCare.Web.Middleware;
 
 /// <summary>
 /// Middleware global para captura de exceções.
-/// Converte exceções de domínio em respostas HTTP apropriadas.
+/// Converte exceções de domínio em respostas HTTP apropriadas e gera logs estruturados.
 /// </summary>
 public class TratamentoErrosMiddleware
 {
@@ -28,25 +28,30 @@ public class TratamentoErrosMiddleware
         }
         catch (EntidadeNaoEncontradaException ex)
         {
+            _logger.LogWarning("Entidade não encontrada: {Message}", ex.Message);
             await EscreverErro(context, 404, ex.Message);
         }
         catch (ConflitoAgendamentoException ex)
         {
+            _logger.LogWarning("Conflito de agendamento: {Message}", ex.Message);
             await EscreverErro(context, 409, ex.Message);
         }
         catch (EstoqueInsuficienteException ex)
         {
+            _logger.LogWarning("Estoque insuficiente: {Message}", ex.Message);
             await EscreverErro(context, 400, ex.Message);
         }
         catch (DominioException ex)
         {
-            // Captura DominioException genérica e quaisquer subclasses não tratadas acima
+            _logger.LogWarning("Regra de negócio violada: {Message}", ex.Message);
             await EscreverErro(context, 400, ex.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro não tratado em {Path}", context.Request.Path);
-            await EscreverErro(context, 500, "Erro interno do servidor.");
+            _logger.LogError(ex, "Erro crítico não tratado na rota {Path}. Detalhes: {Message}", 
+                context.Request.Path, ex.Message);
+            
+            await EscreverErro(context, 500, "Ocorreu um erro inesperado no servidor. Por favor, tente novamente mais tarde.");
         }
     }
 

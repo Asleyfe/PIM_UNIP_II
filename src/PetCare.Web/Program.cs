@@ -10,8 +10,19 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configuração do Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/petcare-.log", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Configuração robusta do WebRoot para local e nuvem
 if (string.IsNullOrEmpty(builder.Environment.WebRootPath))
@@ -84,6 +95,8 @@ builder.Services.AddScoped<IHistoricoService, HistoricoService>();
 
 var app = builder.Build();
 
+app.UseSerilogRequestLogging(); // Loga requisições HTTP automaticamente
+
 app.UseStaticFiles();
 
 app.UseMiddleware<TratamentoErrosMiddleware>();
@@ -110,4 +123,16 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
-app.Run();
+try
+{
+    Log.Information("Iniciando o servidor PetCare...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "O servidor PetCare falhou ao iniciar inesperadamente.");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
