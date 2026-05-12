@@ -21,7 +21,8 @@ public class Agendamento : EntidadeBase
     public long VeterinarioId { get; private set; }
 
     /// <summary>
-    /// Valor da consulta ou procedimento agendado.
+    /// Valor da consulta ou procedimento agendado. 
+    /// Preenchido apenas na conclusão do atendimento.
     /// </summary>
     public decimal Preco { get; private set; }
 
@@ -58,13 +59,11 @@ public class Agendamento : EntidadeBase
         long animalId,
         long veterinarioId,
         DateTime dataHoraConsulta,
-        decimal preco,
         string? observacao = null)
     {
         ValidarId(tutorId, nameof(tutorId));
         ValidarId(animalId, nameof(animalId));
         ValidarId(veterinarioId, nameof(veterinarioId));
-        ValidarPreco(preco);
 
         var dataHoraUtc = NormalizarParaUtc(dataHoraConsulta);
         ValidarDataHoraNaoPassada(dataHoraUtc);
@@ -74,7 +73,7 @@ public class Agendamento : EntidadeBase
         AnimalId = animalId;
         VeterinarioId = veterinarioId;
         DataHoraConsulta = dataHoraUtc;
-        Preco = preco;
+        Preco = 0; // Inicia zerado
         Status = StatusAgendamento.AGENDADO;
         Observacao = observacao?.Trim();
     }
@@ -84,14 +83,17 @@ public class Agendamento : EntidadeBase
     // =========================================================================
 
     /// <summary>
-    /// Marca o agendamento como concluído. Só permitido a partir do estado Agendado.
+    /// Marca o agendamento como concluído e define o valor final.
     /// </summary>
-    public void Concluir()
+    public void Concluir(decimal precoFinal)
     {
         if (Status != StatusAgendamento.AGENDADO)
             throw new DominioException(
                 $"Só é possível concluir agendamentos no status Agendado. Status atual: {Status}.");
 
+        ValidarPreco(precoFinal);
+        
+        Preco = precoFinal;
         Status = StatusAgendamento.CONCLUIDO;
     }
 
@@ -131,15 +133,6 @@ public class Agendamento : EntidadeBase
         Observacao = novaObservacao?.Trim();
     }
 
-    /// <summary>
-    /// Atualiza o preço do agendamento.
-    /// </summary>
-    public void AtualizarPreco(decimal novoPreco)
-    {
-        ValidarPreco(novoPreco);
-        Preco = novoPreco;
-    }
-
     // =========================================================================
     // VALIDAÇÕES E NORMALIZAÇÕES PRIVADAS
     // =========================================================================
@@ -176,7 +169,7 @@ public class Agendamento : EntidadeBase
 
     private static void ValidarPreco(decimal preco)
     {
-        if (preco < 0)
+        if (preco <= 0)
             throw new DominioException("O preço não pode ser negativo.");
     }
 }

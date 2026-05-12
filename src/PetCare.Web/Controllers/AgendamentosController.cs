@@ -78,9 +78,9 @@ public class AgendamentosController : Controller
     }
 
     [HttpPatch("/api/Agendamentos/{id:long}/concluir")]
-    public async Task<IActionResult> Concluir(long id)
+    public async Task<IActionResult> Concluir(long id, [FromQuery] decimal preco)
     {
-        var concluido = await _agendamentoService.Concluir(id);
+        var concluido = await _agendamentoService.Concluir(id, preco);
         if (!concluido)
             return NotFound(new { mensagem = $"Agendamento com id {id} não encontrado." });
 

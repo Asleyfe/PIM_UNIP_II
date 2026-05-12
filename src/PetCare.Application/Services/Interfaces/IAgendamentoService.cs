@@ -9,6 +9,6 @@ public interface IAgendamentoService
     Task<IEnumerable<AgendamentoResponseDto>> ListarAgendaDoDia(DateOnly data);
     Task<AgendamentoResponseDto> Agendar(AgendamentoCreateDto dto);
     Task<bool> Cancelar(long id);
-    Task<bool> Concluir(long id);
+    Task<bool> Concluir(long id, decimal preco);
     Task<bool> Reagendar(long id, DateTime novaDataHora);
 }

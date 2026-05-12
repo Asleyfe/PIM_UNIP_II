@@ -67,7 +67,6 @@ public class AgendamentoService : IAgendamentoService
             dto.AnimalId,
             dto.VeterinarioId,
             dto.DataHoraConsulta,
-            dto.Preco,
             dto.Observacao
         );
 
@@ -84,12 +83,12 @@ public class AgendamentoService : IAgendamentoService
         return await _agendamentoRepository.Atualizar(agendamento);
     }
 
-    public async Task<bool> Concluir(long id)
+    public async Task<bool> Concluir(long id, decimal preco)
     {
         var agendamento = await _agendamentoRepository.ObterPorId(id);
         if (agendamento == null) return false;
 
-        agendamento.Concluir();
+        agendamento.Concluir(preco);
         return await _agendamentoRepository.Atualizar(agendamento);
     }
 

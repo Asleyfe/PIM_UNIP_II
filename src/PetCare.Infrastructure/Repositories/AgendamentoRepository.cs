@@ -151,12 +151,14 @@ public class AgendamentoRepository : IAgendamentoRepository
             (long)row.animalid,
             (long)row.veterinarioid,
             (DateTime)row.datahoraconsulta,
-            (decimal)row.preco,
             (string?)row.observacao
         );
 
         agendamento.SetId((long)row.id);
         agendamento.SetCreatedAt((DateTime)row.createdat);
+
+        // Preenche o preço que vem do banco
+        agendamento.GetType().GetProperty("Preco")!.SetValue(agendamento, (decimal)row.preco);
 
         // Ajusta o status que vem do banco
         if (Enum.TryParse<StatusAgendamento>((string)row.status, true, out var status))
