@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetCare.Application.DTOs.Veterinario;
 using PetCare.Application.Services.Interfaces;
@@ -5,6 +6,7 @@ using PetCare.Application.Services.Interfaces;
 namespace PetCare.Web.Controllers;
 
 [Route("Veterinarios")]
+[Authorize]
 public class VeterinariosController : Controller
 {
     private readonly IVeterinarioService _veterinarioService;

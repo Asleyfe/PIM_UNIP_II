@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetCare.Application.DTOs.Atendimento;
 using PetCare.Application.Services.Interfaces;
@@ -5,6 +6,7 @@ using PetCare.Application.Services.Interfaces;
 namespace PetCare.Web.Controllers;
 
 [Route("Prontuarios")]
+[Authorize]
 public class ProntuariosController : Controller
 {
     private readonly IProntuarioService _prontuarioService;

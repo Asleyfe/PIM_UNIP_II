@@ -17,4 +17,7 @@ public class SupabaseSettings
 
     /// <summary>Chave pública anon do Supabase.</summary>
     public string AnonKey { get; set; } = string.Empty;
+
+    /// <summary>Segredo JWT (JWT Secret) do Supabase para validar tokens no Back End.</summary>
+    public string JwtSecret { get; set; } = string.Empty;
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetCare.Application.DTOs.Tutor;
 using PetCare.Application.Services.Interfaces;
@@ -5,6 +6,7 @@ using PetCare.Application.Services.Interfaces;
 namespace PetCare.Web.Controllers;
 
 [Route("Tutores")]
+[Authorize]
 public class TutoresController : Controller
 {
     private readonly ITutorService _tutorService;

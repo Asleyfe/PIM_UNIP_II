@@ -7,6 +7,9 @@ using PetCare.Application.Services.Interfaces;
 using PetCare.Application.Services;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,8 +28,33 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configurações Supabase
-builder.Services.Configure<SupabaseSettings>(
-    builder.Configuration.GetSection(SupabaseSettings.SectionName));
+var supabaseSection = builder.Configuration.GetSection(SupabaseSettings.SectionName);
+builder.Services.Configure<SupabaseSettings>(supabaseSection);
+var supabaseSettings = supabaseSection.Get<SupabaseSettings>();
+
+// Configuração de Autenticação JWT (Supabase)
+if (supabaseSettings != null && !string.IsNullOrEmpty(supabaseSettings.JwtSecret))
+{
+    var key = Encoding.UTF8.GetBytes(supabaseSettings.JwtSecret);
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = false,
+            ValidateAudience = true,
+            ValidAudience = "authenticated", // Padrão do Supabase
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+}
 
 // Injeções de Dependência
 builder.Services.AddSingleton<IConnectionFactory, NpgsqlConnectionFactory>();
@@ -73,6 +101,8 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

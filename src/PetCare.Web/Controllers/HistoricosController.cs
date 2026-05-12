@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetCare.Application.DTOs.Atendimento;
 using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 [Route("Historico")]
+[Authorize]
 public class HistoricosController : Controller
 {
     private readonly IHistoricoService _historicoService;

@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetCare.Application.Services.Interfaces;
 
 namespace PetCare.Web.Controllers;
 
 [Route("Relatorios")]
+[Authorize]
 public class RelatoriosController : Controller
 {
     private readonly IRelatorioService _relatorioService;

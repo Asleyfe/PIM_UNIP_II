@@ -45,6 +45,35 @@
     @await RenderSectionAsync("Scripts", required: false)
     
     <script>
+        // Verificação Global de Autenticação
+        (function checkAuth() {
+            const token = localStorage.getItem('pc_access_token');
+            const isLoginPage = window.location.pathname.toLowerCase().includes('/account/login');
+            
+            if (!token && !isLoginPage) {
+                window.location.href = '/Account/Login';
+            }
+        })();
+
+        // Helper para chamadas de API com autenticação
+        async function apiFetch(url, options = {}) {
+            const token = localStorage.getItem('pc_access_token');
+            const headers = {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            
+            const response = await fetch(url, { ...options, headers });
+            
+            if (response.status === 401) {
+                fazerLogout();
+                return;
+            }
+            
+            return response;
+        }
+
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').textContent = msg;

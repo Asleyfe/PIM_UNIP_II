@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetCare.Application.DTOs.Vendas;
 using PetCare.Application.Services.Interfaces;
@@ -5,6 +6,7 @@ using PetCare.Application.Services.Interfaces;
 namespace PetCare.Web.Controllers;
 
 [Route("Vendas")]
+[Authorize]
 public class VendasController : Controller
 {
     private readonly IVendaService _vendaService;

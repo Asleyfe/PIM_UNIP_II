@@ -122,8 +122,10 @@
             document.getElementById('loginError').classList.add('show');
             btnLogin.disabled = false;
         } else {
+            // Armazena o token para uso nas chamadas de API
+            localStorage.setItem('pc_access_token', data.session.access_token);
             localStorage.setItem('pc_user_email', data.user.email);
-            window.location.href = '/Home/Index';
+            window.location.href = '/';
         }
     });
 
