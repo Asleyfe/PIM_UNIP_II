@@ -30,7 +30,7 @@ public class LembreteTests
     public void DeveCriarLembreteEnviado()
     {
         // Arrange & Act
-        var lembrete = new LembreteEnviado(1, 1, TipoLembrete.Consulta, MeioEnvio.WHATSAPP, StatusEnvio.ENVIADO, "Olá, sua consulta está agendada!");
+        var lembrete = new LembreteEnviado(1, 1, TipoLembrete.CONSULTA, MeioEnvio.WHATSAPP, StatusEnvio.ENVIADO, "Olá, sua consulta está agendada!");
 
         // Assert
         lembrete.TutorId.Should().Be(1);

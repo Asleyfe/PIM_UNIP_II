@@ -42,4 +42,9 @@ public class LembreteEnviado : EntidadeBase
         AgendamentoId = agendamentoId;
         DataEnvio = DateTime.UtcNow;
     }
+
+    public void AtualizarStatus(StatusEnvio novoStatus)
+    {
+        StatusEnvio = novoStatus;
+    }
 }

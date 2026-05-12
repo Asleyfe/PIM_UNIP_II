@@ -1,7 +1,7 @@
-﻿namespace PetCare.Domain.Enums;
+namespace PetCare.Domain.Enums;
 
 public enum TipoLembrete
 {
-    Consulta,
-    Vacina
+    CONSULTA,
+    VACINA
 }
