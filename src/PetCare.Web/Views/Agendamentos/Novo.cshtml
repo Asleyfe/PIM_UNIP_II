@@ -2,10 +2,114 @@
     ViewData["Title"] = "Novo Agendamento";
 }
 
-<div class="header-container">
+<style>
+    .form-card { background: #fff; border-radius: var(--radius); box-shadow: 0 2px 12px var(--sombra); padding: 32px; max-width: 700px; }
+    .form-section-title { font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-s); margin: 24px 0 16px; border-bottom: 1px solid var(--cinza-2); padding-bottom: 8px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: .82rem; font-weight: 600; color: var(--texto-s); }
+    .form-group input, .form-group select, .form-group textarea { padding: 10px 14px; border: 1px solid var(--cinza-2); border-radius: var(--radius-s); font-family: 'DM Sans', sans-serif; font-size: .9rem; outline: none; transition: border-color var(--trans); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--verde-d); }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-actions { display: flex; gap: 12px; margin-top: 28px; }
+    .btn-cancel { padding: 10px 24px; border-radius: 50px; font-weight: 600; cursor: pointer; border: 1px solid var(--cinza-2); background: #fff; color: var(--texto-s); font-family: 'DM Sans', sans-serif; transition: var(--trans); }
+    .btn-cancel:hover { background: var(--cinza); }
+    @@media(max-width:640px) { .form-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="header-container" style="margin-bottom:24px">
     <h1 class="page-title">Agendar Consulta</h1>
+    <a href="/Agendamentos" class="btn-sm" style="background:var(--cinza);color:var(--texto-s)">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
 </div>
 
-<div class="content-container">
-    <p>Formulário de agendamento em desenvolvimento...</p>
+<div class="form-card">
+    <form id="form-agendamento" novalidate>
+
+        <div class="form-section-title">Paciente e Responsável</div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>ID do Tutor *</label>
+                <input type="number" id="tutorId" placeholder="ID do tutor" min="1" required />
+            </div>
+            <div class="form-group">
+                <label>ID do Animal *</label>
+                <input type="number" id="animalId" placeholder="ID do animal" min="1" required />
+            </div>
+        </div>
+
+        <div class="form-section-title">Consulta</div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>ID do Veterinário *</label>
+                <input type="number" id="veterinarioId" placeholder="ID do veterinário" min="1" required />
+            </div>
+            <div class="form-group">
+                <label>Data e Hora *</label>
+                <input type="datetime-local" id="dataHora" required />
+            </div>
+            <div class="form-group full">
+                <label>Observação</label>
+                <textarea id="observacao" rows="3" placeholder="Observações opcionais..."></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-sm btn-green" id="btn-salvar">
+                <i class="fas fa-calendar-check"></i> Agendar
+            </button>
+            <a href="/Agendamentos" class="btn-cancel">Cancelar</a>
+        </div>
+    </form>
 </div>
+
+@section Scripts {
+<script>
+// Define mínimo como agora
+document.getElementById('dataHora').min = new Date().toISOString().slice(0,16);
+
+document.getElementById('form-agendamento').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const tutorId      = parseInt(document.getElementById('tutorId').value);
+    const animalId     = parseInt(document.getElementById('animalId').value);
+    const veterinarioId= parseInt(document.getElementById('veterinarioId').value);
+    const dataHora     = document.getElementById('dataHora').value;
+    const observacao   = document.getElementById('observacao').value.trim();
+
+    if (!tutorId || !animalId || !veterinarioId || !dataHora) {
+        showToast('Preencha todos os campos obrigatórios.', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btn-salvar');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agendando...';
+
+    const payload = { tutorId, animalId, veterinarioId, dataHoraConsulta: dataHora, observacao: observacao || null };
+
+    try {
+        const res = await fetch('/api/Agendamentos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok || res.status === 201) {
+            showToast('Consulta agendada com sucesso!');
+            setTimeout(() => window.location.href = '/Agendamentos', 1200);
+        } else {
+            const err = await res.json();
+            showToast(err.mensagem || 'Erro ao agendar.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-calendar-check"></i> Agendar';
+        }
+    } catch {
+        showToast('Erro de conexão. Tente novamente.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-calendar-check"></i> Agendar';
+    }
+});
+</script>
+}

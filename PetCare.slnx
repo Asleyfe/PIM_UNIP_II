@@ -3,6 +3,7 @@
     <Project Path="src/PetCare.Application/PetCare.Application.csproj" />
     <Project Path="src/PetCare.Domain/PetCare.Domain.csproj" />
     <Project Path="src/PetCare.Infrastructure/PetCare.Infrastructure.csproj" />
+    <Project Path="src/PetCare.Web/PetCare.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/PetCare.Tests/PetCare.Tests.csproj" />
