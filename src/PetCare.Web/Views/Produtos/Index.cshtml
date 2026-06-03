@@ -2,10 +2,207 @@
     ViewData["Title"] = "Controle de Estoque";
 }
 
-<div class="header-container">
-    <h1 class="page-title">Estoque</h1>
+<style>
+    .filtros-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filtros-bar input {
+        flex: 1; min-width: 180px; padding: 10px 16px; border: 1px solid var(--cinza-2);
+        border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: .9rem; outline: none; background: #fff;
+    }
+    .filtros-bar input:focus { border-color: var(--verde-d); }
+    .badge { padding: 3px 10px; border-radius: 50px; font-size: .75rem; font-weight: 600; }
+    .badge-ok       { background: var(--verde-l);  color: var(--verde-d); }
+    .badge-baixo    { background: #fff3e0; color: var(--laranja); }
+    .badge-vencido  { background: var(--rosa-l);   color: var(--rosa-d); }
+    .badge-vencendo { background: var(--roxo-l);   color: var(--roxo); }
+    .action-btns { display: flex; gap: 6px; }
+    .btn-icon { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .85rem; transition: var(--trans); }
+    .btn-icon.del   { background: var(--rosa-l); color: var(--rosa-d); }
+    .btn-icon.del:hover   { background: var(--rosa-d); color: #fff; }
+    .btn-icon.mov   { background: var(--azul-l); color: var(--azul); }
+    .btn-icon.mov:hover   { background: var(--azul); color: #fff; }
+    .empty-state { text-align: center; padding: 48px 0; color: var(--texto-s); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; display: block; color: var(--cinza-2); }
+
+    /* Modal movimentação */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:1000; align-items:center; justify-content:center; }
+    .modal-overlay.show { display:flex; }
+    .modal-box { background:#fff; border-radius:var(--radius); padding:32px; width:100%; max-width:400px; box-shadow:0 8px 40px rgba(0,0,0,.2); }
+    .modal-box h3 { margin-bottom:20px; font-size:1.1rem; }
+    .modal-box .form-group { margin-bottom:16px; display:flex; flex-direction:column; gap:6px; }
+    .modal-box .form-group label { font-size:.82rem; font-weight:600; color:var(--texto-s); }
+    .modal-box .form-group input, .modal-box .form-group select { padding:10px 14px; border:1px solid var(--cinza-2); border-radius:var(--radius-s); font-family:'DM Sans',sans-serif; font-size:.9rem; outline:none; }
+    .modal-btns { display:flex; gap:10px; margin-top:20px; }
+    .modal-btn { flex:1; padding:10px; border-radius:50px; font-weight:600; cursor:pointer; border:none; font-family:'DM Sans',sans-serif; }
+    .modal-btn-cancel { background:var(--cinza); color:var(--texto-s); }
+    .modal-btn-save   { background:var(--verde-d); color:#fff; }
+</style>
+
+<!-- Modal movimentação -->
+<div class="modal-overlay" id="modalMov">
+    <div class="modal-box">
+        <h3><i class="fas fa-right-left" style="color:var(--azul);margin-right:8px"></i>Movimentar Estoque</h3>
+        <input type="hidden" id="mov-produto-id" />
+        <div class="form-group">
+            <label>Tipo</label>
+            <select id="mov-tipo">
+                <option value="Entrada">Entrada (adicionar)</option>
+                <option value="Saida">Saída (retirar)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Quantidade</label>
+            <input type="number" id="mov-qty" min="1" value="1" />
+        </div>
+        <div class="modal-btns">
+            <button class="modal-btn modal-btn-cancel" onclick="fecharModal()">Cancelar</button>
+            <button class="modal-btn modal-btn-save" onclick="salvarMovimentacao()">Confirmar</button>
+        </div>
+    </div>
 </div>
 
-<div class="content-container">
-    <p>Controle de produtos em desenvolvimento...</p>
+<div class="header-container" style="margin-bottom:20px">
+    <h1 class="page-title">Estoque</h1>
+    <div style="display:flex;gap:10px">
+        <button class="btn-sm" style="background:var(--laranja-l);color:var(--laranja)" onclick="filtrarBaixo()">
+            <i class="fas fa-triangle-exclamation"></i> Estoque Baixo
+        </button>
+        <button class="btn-sm btn-green" onclick="carregarProdutos()">
+            <i class="fas fa-rotate-right"></i> Todos
+        </button>
+    </div>
 </div>
+
+<div class="filtros-bar">
+    <input type="text" id="busca" placeholder="Filtrar por nome ou categoria..." oninput="filtrar(this.value)" />
+</div>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Qtd. Estoque</th>
+                <th>Validade</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-body">
+            <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--texto-s)">Carregando...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+<script>
+let todosProdutos = [];
+
+async function carregarProdutos() {
+    try {
+        const res = await fetch('/api/Produtos');
+        if (!res.ok) throw new Error();
+        todosProdutos = await res.json();
+        renderTabela(todosProdutos);
+    } catch {
+        document.getElementById('tabela-body').innerHTML =
+            `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--rosa-d)"><i class="fas fa-circle-xmark"></i> Erro ao carregar produtos.</td></tr>`;
+    }
+}
+
+async function filtrarBaixo() {
+    try {
+        const res = await fetch('/api/Produtos/estoque-baixo');
+        renderTabela(await res.json());
+    } catch { }
+}
+
+function filtrar(termo) {
+    const t = termo.toLowerCase();
+    renderTabela(todosProdutos.filter(p =>
+        p.nome.toLowerCase().includes(t) || p.categoria.toLowerCase().includes(t)
+    ));
+}
+
+function statusBadge(p) {
+    if (p.estaVencido)           return '<span class="badge badge-vencido">Vencido</span>';
+    if (p.proximoAoVencimento)   return '<span class="badge badge-vencendo">Vencendo</span>';
+    if (p.precisaReposicao)      return '<span class="badge badge-baixo">Estoque Baixo</span>';
+    return '<span class="badge badge-ok">OK</span>';
+}
+
+function renderTabela(produtos) {
+    const tbody = document.getElementById('tabela-body');
+    if (!produtos.length) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-boxes-stacked"></i>Nenhum produto encontrado.</div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = produtos.map(p => `
+        <tr>
+            <td>${p.id}</td>
+            <td><strong>${p.nome}</strong>${p.descricao ? `<br><small style="color:var(--texto-s)">${p.descricao}</small>` : ''}</td>
+            <td>${p.categoria}</td>
+            <td>R$ ${p.preco.toFixed(2).replace('.',',')}</td>
+            <td>${p.quantidadeEstoque} <small style="color:var(--texto-s)">(mín ${p.estoqueMinimo})</small></td>
+            <td>${p.validade ? new Date(p.validade).toLocaleDateString('pt-BR') : '—'}</td>
+            <td>${statusBadge(p)}</td>
+            <td>
+                <div class="action-btns">
+                    <button class="btn-icon mov" title="Movimentar" onclick="abrirModal(${p.id})">
+                        <i class="fas fa-right-left"></i>
+                    </button>
+                    <button class="btn-icon del" title="Remover" onclick="remover(${p.id}, '${p.nome}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function abrirModal(id) {
+    document.getElementById('mov-produto-id').value = id;
+    document.getElementById('mov-qty').value = 1;
+    document.getElementById('modalMov').classList.add('show');
+}
+function fecharModal() { document.getElementById('modalMov').classList.remove('show'); }
+
+async function salvarMovimentacao() {
+    const id  = document.getElementById('mov-produto-id').value;
+    const qty = parseInt(document.getElementById('mov-qty').value);
+    const tipo= document.getElementById('mov-tipo').value;
+
+    if (!qty || qty < 1) { showToast('Quantidade inválida.', 'error'); return; }
+
+    const res = await fetch(`/api/Produtos/${id}/movimentacao`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantidade: qty, tipo })
+    });
+
+    fecharModal();
+    if (res.ok) {
+        showToast('Movimentação registrada.');
+        carregarProdutos();
+    } else {
+        const err = await res.json();
+        showToast(err.mensagem || 'Erro ao movimentar estoque.', 'error');
+    }
+}
+
+async function remover(id, nome) {
+    if (!confirm(`Remover o produto "${nome}"?`)) return;
+    const res = await fetch(`/api/Produtos/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        showToast(`Produto "${nome}" removido.`);
+        carregarProdutos();
+    } else {
+        showToast('Erro ao remover produto.', 'error');
+    }
+}
+
+carregarProdutos();
+</script>
+}

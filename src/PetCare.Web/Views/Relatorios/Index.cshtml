@@ -2,10 +2,176 @@
     ViewData["Title"] = "Relatórios Gerenciais";
 }
 
-<div class="header-container">
-    <h1 class="page-title">Relatórios</h1>
+<style>
+    .relatorio-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; margin-bottom: 32px; }
+    .rel-card { background: #fff; border-radius: var(--radius); box-shadow: 0 2px 12px var(--sombra); padding: 28px; }
+    .rel-card h2 { font-size: 1.05rem; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .rel-card h2 i { color: var(--verde-d); }
+    .date-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .date-row label { font-size: .82rem; font-weight: 600; color: var(--texto-s); }
+    .date-row input { padding: 8px 12px; border: 1px solid var(--cinza-2); border-radius: var(--radius-s); font-family: 'DM Sans', sans-serif; font-size: .88rem; outline: none; }
+    .date-row input:focus { border-color: var(--verde-d); }
+    .rel-resultado { margin-top: 16px; background: var(--cinza); border-radius: var(--radius-s); padding: 16px; min-height: 80px; }
+    .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--cinza-2); font-size: .88rem; }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row strong { color: var(--verde-d); }
+    @@media(max-width:700px) { .relatorio-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="header-container" style="margin-bottom:24px">
+    <h1 class="page-title">Relatórios Gerenciais</h1>
 </div>
 
-<div class="content-container">
-    <p>Extração de dados em desenvolvimento...</p>
+<div class="relatorio-grid">
+
+    <!-- Relatório de Faturamento -->
+    <div class="rel-card">
+        <h2><i class="fas fa-money-bill-trend-up"></i> Faturamento</h2>
+        <div class="date-row">
+            <label>De:</label>
+            <input type="date" id="fat-inicio" />
+            <label>Até:</label>
+            <input type="date" id="fat-fim" />
+            <button class="btn-sm btn-green" onclick="gerarFaturamento()">
+                <i class="fas fa-chart-column"></i> Gerar
+            </button>
+        </div>
+        <div class="rel-resultado" id="resultado-faturamento">
+            <p style="color:var(--texto-s);font-size:.85rem">Selecione o período e clique em Gerar.</p>
+        </div>
+    </div>
+
+    <!-- Relatório de Atendimentos por Veterinário -->
+    <div class="rel-card">
+        <h2><i class="fas fa-user-doctor"></i> Atendimentos por Veterinário</h2>
+        <div class="date-row">
+            <label>De:</label>
+            <input type="date" id="vet-inicio" />
+            <label>Até:</label>
+            <input type="date" id="vet-fim" />
+            <button class="btn-sm btn-green" onclick="gerarAtendimentos()">
+                <i class="fas fa-chart-bar"></i> Gerar
+            </button>
+        </div>
+        <div class="rel-resultado" id="resultado-atendimentos">
+            <p style="color:var(--texto-s);font-size:.85rem">Selecione o período e clique em Gerar.</p>
+        </div>
+    </div>
+
+    <!-- Relatório de Animais Mais Atendidos -->
+    <div class="rel-card">
+        <h2><i class="fas fa-paw"></i> Animais Mais Atendidos</h2>
+        <div style="margin-bottom:14px">
+            <button class="btn-sm btn-green" onclick="gerarAnimaisMaisAtendidos()">
+                <i class="fas fa-chart-pie"></i> Gerar
+            </button>
+        </div>
+        <div class="rel-resultado" id="resultado-animais">
+            <p style="color:var(--texto-s);font-size:.85rem">Clique em Gerar para carregar.</p>
+        </div>
+    </div>
+
+    <!-- Relatório de Estoque Crítico -->
+    <div class="rel-card">
+        <h2><i class="fas fa-boxes-stacked"></i> Estoque Crítico</h2>
+        <div style="margin-bottom:14px">
+            <button class="btn-sm btn-green" onclick="gerarEstoqueCritico()">
+                <i class="fas fa-triangle-exclamation"></i> Gerar
+            </button>
+        </div>
+        <div class="rel-resultado" id="resultado-estoque">
+            <p style="color:var(--texto-s);font-size:.85rem">Clique em Gerar para carregar.</p>
+        </div>
+    </div>
+
 </div>
+
+@section Scripts {
+<script>
+function hoje() { return new Date().toISOString().split('T')[0]; }
+function inicioMes() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`; }
+
+document.getElementById('fat-inicio').value = inicioMes();
+document.getElementById('fat-fim').value    = hoje();
+document.getElementById('vet-inicio').value = inicioMes();
+document.getElementById('vet-fim').value    = hoje();
+
+async function gerarFaturamento() {
+    const inicio = document.getElementById('fat-inicio').value;
+    const fim    = document.getElementById('fat-fim').value;
+    const div    = document.getElementById('resultado-faturamento');
+    if (!inicio || !fim) { showToast('Selecione o período.', 'error'); return; }
+
+    div.innerHTML = '<p style="color:var(--texto-s);font-size:.85rem">Carregando...</p>';
+    try {
+        const res = await fetch(`/api/Relatorios/faturamento?inicio=${inicio}&fim=${fim}`);
+        if (!res.ok) throw new Error();
+        const d = await res.json();
+
+        let html = `
+            <div class="stat-row"><span>Faturamento Total</span><strong>R$ ${d.faturamentoTotal.toFixed(2).replace('.',',')}</strong></div>
+        `;
+        if (d.porCategoria?.length) {
+            html += d.porCategoria.map(c =>
+                `<div class="stat-row"><span>${c.categoria}</span><strong>R$ ${c.faturamento.toFixed(2).replace('.',',')}</strong></div>`
+            ).join('');
+        }
+        div.innerHTML = html;
+    } catch {
+        div.innerHTML = '<p style="color:var(--rosa-d);font-size:.85rem"><i class="fas fa-circle-xmark"></i> Erro ao gerar relatório.</p>';
+    }
+}
+
+async function gerarAtendimentos() {
+    const inicio = document.getElementById('vet-inicio').value;
+    const fim    = document.getElementById('vet-fim').value;
+    const div    = document.getElementById('resultado-atendimentos');
+    if (!inicio || !fim) { showToast('Selecione o período.', 'error'); return; }
+
+    div.innerHTML = '<p style="color:var(--texto-s);font-size:.85rem">Carregando...</p>';
+    try {
+        const res = await fetch(`/api/Relatorios/atendimentos-por-veterinario?inicio=${inicio}&fim=${fim}`);
+        if (!res.ok) throw new Error();
+        const lista = await res.json();
+        if (!lista.length) { div.innerHTML = '<p style="color:var(--texto-s);font-size:.85rem">Nenhum atendimento no período.</p>'; return; }
+        div.innerHTML = lista.map(v =>
+            `<div class="stat-row"><span>${v.veterinarioNome}</span><strong>${v.totalAtendimentos} atendimento(s)</strong></div>`
+        ).join('');
+    } catch {
+        div.innerHTML = '<p style="color:var(--rosa-d);font-size:.85rem"><i class="fas fa-circle-xmark"></i> Erro ao gerar relatório.</p>';
+    }
+}
+
+async function gerarAnimaisMaisAtendidos() {
+    const div = document.getElementById('resultado-animais');
+    div.innerHTML = '<p style="color:var(--texto-s);font-size:.85rem">Carregando...</p>';
+    try {
+        const res = await fetch('/api/Relatorios/animais-mais-atendidos');
+        if (!res.ok) throw new Error();
+        const lista = await res.json();
+        if (!lista.length) { div.innerHTML = '<p style="color:var(--texto-s);font-size:.85rem">Nenhum dado disponível.</p>'; return; }
+        div.innerHTML = lista.map(a =>
+            `<div class="stat-row"><span>${a.animalNome}</span><strong>${a.totalAtendimentos} atendimento(s)</strong></div>`
+        ).join('');
+    } catch {
+        div.innerHTML = '<p style="color:var(--rosa-d);font-size:.85rem"><i class="fas fa-circle-xmark"></i> Erro ao gerar relatório.</p>';
+    }
+}
+
+async function gerarEstoqueCritico() {
+    const div = document.getElementById('resultado-estoque');
+    div.innerHTML = '<p style="color:var(--texto-s);font-size:.85rem">Carregando...</p>';
+    try {
+        const res = await fetch('/api/Produtos/estoque-baixo');
+        if (!res.ok) throw new Error();
+        const lista = await res.json();
+        if (!lista.length) { div.innerHTML = '<p style="color:var(--verde-d);font-size:.85rem"><i class="fas fa-circle-check"></i> Estoque em dia!</p>'; return; }
+        div.innerHTML = lista.map(p =>
+            `<div class="stat-row"><span>${p.nome}</span><strong style="color:var(--laranja)">${p.quantidadeEstoque} un (mín ${p.estoqueMinimo})</strong></div>`
+        ).join('');
+    } catch {
+        div.innerHTML = '<p style="color:var(--rosa-d);font-size:.85rem"><i class="fas fa-circle-xmark"></i> Erro ao gerar relatório.</p>';
+    }
+}
+</script>
+}

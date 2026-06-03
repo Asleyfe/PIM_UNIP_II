@@ -2,10 +2,124 @@
     ViewData["Title"] = "Novo Animal";
 }
 
-<div class="header-container">
+<style>
+    .form-card { background: #fff; border-radius: var(--radius); box-shadow: 0 2px 12px var(--sombra); padding: 32px; max-width: 700px; }
+    .form-section-title { font-size: .8rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-s); margin: 24px 0 16px; border-bottom: 1px solid var(--cinza-2); padding-bottom: 8px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: .82rem; font-weight: 600; color: var(--texto-s); }
+    .form-group input, .form-group select { padding: 10px 14px; border: 1px solid var(--cinza-2); border-radius: var(--radius-s); font-family: 'DM Sans', sans-serif; font-size: .9rem; outline: none; transition: border-color var(--trans); }
+    .form-group input:focus, .form-group select:focus { border-color: var(--verde-d); }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-actions { display: flex; gap: 12px; margin-top: 28px; }
+    .btn-cancel { padding: 10px 24px; border-radius: 50px; font-weight: 600; cursor: pointer; border: 1px solid var(--cinza-2); background: #fff; color: var(--texto-s); font-family: 'DM Sans', sans-serif; transition: var(--trans); }
+    .btn-cancel:hover { background: var(--cinza); }
+    @@media(max-width:640px) { .form-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="header-container" style="margin-bottom:24px">
     <h1 class="page-title">Cadastrar Animal</h1>
+    <a href="/Animais" class="btn-sm" style="background:var(--cinza);color:var(--texto-s)">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
 </div>
 
-<div class="content-container">
-    <p>Formulário de cadastro em desenvolvimento...</p>
+<div class="form-card">
+    <form id="form-animal" novalidate>
+
+        <div class="form-section-title">Dados do Animal</div>
+        <div class="form-grid">
+            <div class="form-group full">
+                <label>Nome *</label>
+                <input type="text" id="nome" placeholder="Ex: Rex" required />
+            </div>
+            <div class="form-group">
+                <label>Data de Nascimento *</label>
+                <input type="date" id="dataNascimento" required />
+            </div>
+            <div class="form-group">
+                <label>Peso (kg) *</label>
+                <input type="number" id="peso" placeholder="Ex: 5.3" step="0.01" min="0" required />
+            </div>
+            <div class="form-group">
+                <label>Sexo *</label>
+                <select id="sexo" required>
+                    <option value="">Selecione...</option>
+                    <option value="M">Macho</option>
+                    <option value="F">Fêmea</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>ID da Raça *</label>
+                <input type="number" id="racaId" placeholder="ID da raça" min="1" required />
+            </div>
+        </div>
+
+        <div class="form-section-title">Tutor Responsável</div>
+        <div class="form-grid">
+            <div class="form-group full">
+                <label>ID do Tutor *</label>
+                <input type="number" id="tutorId" placeholder="ID do tutor responsável" min="1" required />
+                <small style="color:var(--texto-s);font-size:.78rem">
+                    <i class="fas fa-circle-info"></i>
+                    Consulte o ID do tutor na seção <a href="/Tutores" style="color:var(--verde-d)">Tutores</a>.
+                </small>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-sm btn-green" id="btn-salvar">
+                <i class="fas fa-floppy-disk"></i> Salvar Animal
+            </button>
+            <a href="/Animais" class="btn-cancel">Cancelar</a>
+        </div>
+    </form>
 </div>
+
+@section Scripts {
+<script>
+document.getElementById('form-animal').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const nome   = document.getElementById('nome').value.trim();
+    const dataN  = document.getElementById('dataNascimento').value;
+    const peso   = parseFloat(document.getElementById('peso').value);
+    const sexo   = document.getElementById('sexo').value;
+    const racaId = parseInt(document.getElementById('racaId').value);
+    const tutorId= parseInt(document.getElementById('tutorId').value);
+
+    if (!nome || !dataN || !sexo || !racaId || !tutorId) {
+        showToast('Preencha todos os campos obrigatórios.', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btn-salvar');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+    const payload = { nome, dataNascimento: dataN, peso, sexo, racaId, tutorId };
+
+    try {
+        const res = await fetch('/api/Animais', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok || res.status === 201) {
+            showToast('Animal cadastrado com sucesso!');
+            setTimeout(() => window.location.href = '/Animais', 1200);
+        } else {
+            const err = await res.json();
+            showToast(err.mensagem || 'Erro ao cadastrar animal.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Salvar Animal';
+        }
+    } catch {
+        showToast('Erro de conexão. Tente novamente.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-floppy-disk"></i> Salvar Animal';
+    }
+});
+</script>
+}

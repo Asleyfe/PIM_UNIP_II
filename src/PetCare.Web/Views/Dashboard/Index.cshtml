@@ -2,10 +2,112 @@
     ViewData["Title"] = "Dashboard Gerencial";
 }
 
-<div class="header-container">
-    <h1 class="page-title">Dashboard</h1>
+<style>
+    .dash-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; margin-bottom: 32px; }
+    .dash-card {
+        background: #fff; border-radius: var(--radius); padding: 24px 28px;
+        box-shadow: 0 2px 12px var(--sombra); display: flex; align-items: center; gap: 18px;
+    }
+    .dash-card-icon {
+        width: 56px; height: 56px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+    }
+    .dash-card-icon.green { background: var(--verde-l); color: var(--verde-d); }
+    .dash-card-icon.blue  { background: var(--azul-l);  color: var(--azul); }
+    .dash-card-icon.orange{ background: #fff3e0; color: var(--laranja); }
+    .dash-card-icon.red   { background: var(--rosa-l);  color: var(--rosa-d); }
+    .dash-card-value { font-size: 2rem; font-weight: 700; line-height: 1; color: var(--texto); }
+    .dash-card-label { font-size: .8rem; color: var(--texto-s); margin-top: 4px; }
+
+    .alertas-box {
+        background: #fff; border-radius: var(--radius); padding: 24px 28px;
+        box-shadow: 0 2px 12px var(--sombra);
+    }
+    .alertas-box h2 { font-size: 1.1rem; margin-bottom: 16px; color: var(--texto); }
+    .alerta-item {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 0; border-bottom: 1px solid var(--cinza);
+        font-size: .88rem; color: var(--texto-s);
+    }
+    .alerta-item:last-child { border-bottom: none; }
+    .alerta-item i { color: var(--laranja); }
+    .sem-alertas { color: var(--texto-s); font-size: .88rem; }
+
+    @@media(max-width:900px) { .dash-cards { grid-template-columns: repeat(2,1fr); } }
+    @@media(max-width:500px)  { .dash-cards { grid-template-columns: 1fr; } }
+</style>
+
+<div class="header-container" style="margin-bottom:28px">
+    <h1 class="page-title">Dashboard Gerencial</h1>
+    <button class="btn-sm btn-green" onclick="carregarDados()">
+        <i class="fas fa-rotate-right"></i> Atualizar
+    </button>
 </div>
 
-<div class="content-container">
-    <p>Conteúdo do Dashboard em desenvolvimento...</p>
+<div class="dash-cards">
+    <div class="dash-card">
+        <div class="dash-card-icon green"><i class="fas fa-stethoscope"></i></div>
+        <div>
+            <div class="dash-card-value" id="atendimentos-hoje">—</div>
+            <div class="dash-card-label">Atendimentos hoje</div>
+        </div>
+    </div>
+    <div class="dash-card">
+        <div class="dash-card-icon blue"><i class="fas fa-money-bill-wave"></i></div>
+        <div>
+            <div class="dash-card-value" id="faturamento">—</div>
+            <div class="dash-card-label">Faturamento mensal</div>
+        </div>
+    </div>
+    <div class="dash-card">
+        <div class="dash-card-icon orange"><i class="fas fa-boxes-stacked"></i></div>
+        <div>
+            <div class="dash-card-value" id="estoque-baixo">—</div>
+            <div class="dash-card-label">Produtos com estoque baixo</div>
+        </div>
+    </div>
+    <div class="dash-card">
+        <div class="dash-card-icon red"><i class="fas fa-calendar-xmark"></i></div>
+        <div>
+            <div class="dash-card-value" id="produtos-vencendo">—</div>
+            <div class="dash-card-label">Produtos vencendo</div>
+        </div>
+    </div>
 </div>
+
+<div class="alertas-box">
+    <h2><i class="fas fa-triangle-exclamation" style="color:var(--laranja);margin-right:8px"></i>Alertas do sistema</h2>
+    <div id="alertas-lista"><p class="sem-alertas">Carregando...</p></div>
+</div>
+
+@section Scripts {
+<script>
+async function carregarDados() {
+    try {
+        const res = await fetch('/api/Dashboard/indicadores');
+        if (!res.ok) throw new Error('Erro ao carregar');
+        const d = await res.json();
+
+        document.getElementById('atendimentos-hoje').textContent = d.atendimentosHoje ?? 0;
+        document.getElementById('faturamento').textContent =
+            'R$ ' + (d.faturamentoMensal ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        document.getElementById('estoque-baixo').textContent = d.produtosEstoqueBaixo ?? 0;
+        document.getElementById('produtos-vencendo').textContent = d.produtosVencendo ?? 0;
+
+        const lista = document.getElementById('alertas-lista');
+        if (d.alertas && d.alertas.length > 0) {
+            lista.innerHTML = d.alertas.map(a =>
+                `<div class="alerta-item"><i class="fas fa-circle-exclamation"></i>${a}</div>`
+            ).join('');
+        } else {
+            lista.innerHTML = '<p class="sem-alertas"><i class="fas fa-circle-check" style="color:var(--verde-d)"></i> Nenhum alerta no momento.</p>';
+        }
+    } catch (e) {
+        document.getElementById('alertas-lista').innerHTML =
+            '<p class="sem-alertas" style="color:var(--rosa-d)"><i class="fas fa-circle-xmark"></i> Não foi possível carregar os dados. Verifique a conexão com o banco.</p>';
+    }
+}
+
+carregarDados();
+</script>
+}

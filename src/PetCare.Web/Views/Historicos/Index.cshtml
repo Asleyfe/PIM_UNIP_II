@@ -1,11 +1,84 @@
 @{
-    ViewData["Title"] = "Histórico do Animal";
+    ViewData["Title"] = "Histórico Clínico";
 }
 
-<div class="header-container">
+<style>
+    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .search-bar input { flex: 1; min-width: 180px; padding: 10px 16px; border: 1px solid var(--cinza-2); border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: .9rem; outline: none; background: #fff; }
+    .search-bar input:focus { border-color: var(--verde-d); }
+    .empty-state { text-align: center; padding: 48px 0; color: var(--texto-s); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; display: block; color: var(--cinza-2); }
+    .timeline { position: relative; padding-left: 32px; }
+    .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--verde-l); }
+    .timeline-item { position: relative; margin-bottom: 24px; }
+    .timeline-item::before { content: ''; position: absolute; left: -28px; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: var(--verde-d); border: 2px solid #fff; box-shadow: 0 0 0 2px var(--verde-d); }
+    .timeline-card { background: #fff; border-radius: var(--radius); padding: 18px 22px; box-shadow: 0 2px 10px var(--sombra); }
+    .timeline-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .timeline-card-header h4 { font-size: .95rem; }
+    .timeline-card-header small { font-size: .75rem; color: var(--texto-s); }
+    .timeline-desc { font-size: .88rem; color: var(--texto-s); }
+</style>
+
+<div class="header-container" style="margin-bottom:20px">
     <h1 class="page-title">Histórico Clínico</h1>
 </div>
 
-<div class="content-container">
-    <p>Linha do tempo clínica em desenvolvimento...</p>
+<div class="search-bar">
+    <input type="number" id="animal-id" placeholder="ID do animal..." min="1" />
+    <button class="btn-sm btn-green" onclick="buscarHistorico()">
+        <i class="fas fa-magnifying-glass"></i> Ver Histórico
+    </button>
 </div>
+
+<div id="historico-content">
+    <div class="empty-state">
+        <i class="fas fa-paw"></i>
+        Informe o ID de um animal para ver seu histórico clínico.
+    </div>
+</div>
+
+@section Scripts {
+<script>
+async function buscarHistorico() {
+    const id = document.getElementById('animal-id').value;
+    if (!id) { showToast('Informe o ID do animal.', 'error'); return; }
+
+    const div = document.getElementById('historico-content');
+    div.innerHTML = '<p style="text-align:center;padding:24px;color:var(--texto-s)">Carregando...</p>';
+
+    try {
+        const res = await fetch(`/api/Historicos/animal/${id}`);
+        if (!res.ok) throw new Error();
+        const historicos = await res.json();
+        renderHistorico(historicos);
+    } catch {
+        div.innerHTML = `<p style="text-align:center;padding:24px;color:var(--rosa-d)"><i class="fas fa-circle-xmark"></i> Nenhum histórico encontrado para este animal.</p>`;
+    }
+}
+
+function renderHistorico(lista) {
+    const div = document.getElementById('historico-content');
+    if (!lista.length) {
+        div.innerHTML = `<div class="empty-state"><i class="fas fa-notes-medical"></i>Nenhum histórico clínico encontrado.</div>`;
+        return;
+    }
+
+    div.innerHTML = `
+        <div class="timeline">
+            ${lista.map(h => `
+                <div class="timeline-item">
+                    <div class="timeline-card">
+                        <div class="timeline-card-header">
+                            <h4><i class="fas fa-stethoscope" style="color:var(--verde-d);margin-right:8px"></i>${h.tipoEvento || 'Atendimento'}</h4>
+                            <small>${new Date(h.dataEvento || h.createdAt).toLocaleString('pt-BR', { dateStyle: 'medium', timeStyle: 'short' })}</small>
+                        </div>
+                        <div class="timeline-desc">${h.descricao || h.observacao || '—'}</div>
+                        ${h.veterinarioNome ? `<small style="color:var(--texto-s);margin-top:8px;display:block"><i class="fas fa-user-doctor"></i> ${h.veterinarioNome}</small>` : ''}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+</script>
+}

@@ -2,11 +2,144 @@
     ViewData["Title"] = "Agenda Central";
 }
 
-<div class="header-container">
+<style>
+    .filtros-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .filtros-bar input[type="date"] {
+        padding: 9px 14px; border: 1px solid var(--cinza-2); border-radius: var(--radius-s);
+        font-family: 'DM Sans', sans-serif; font-size: .88rem; outline: none;
+    }
+    .filtros-bar input[type="date"]:focus { border-color: var(--verde-d); }
+    .badge-status { padding: 3px 10px; border-radius: 50px; font-size: .75rem; font-weight: 600; }
+    .badge-agendado  { background: var(--azul-l);  color: var(--azul); }
+    .badge-concluido { background: var(--verde-l);  color: var(--verde-d); }
+    .badge-cancelado { background: var(--rosa-l);   color: var(--rosa-d); }
+    .action-btns { display: flex; gap: 6px; }
+    .btn-icon { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .85rem; transition: var(--trans); }
+    .btn-icon.cancel { background: var(--rosa-l); color: var(--rosa-d); }
+    .btn-icon.cancel:hover { background: var(--rosa-d); color: #fff; }
+    .empty-state { text-align: center; padding: 48px 0; color: var(--texto-s); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; display: block; color: var(--cinza-2); }
+</style>
+
+<div class="header-container" style="margin-bottom:20px">
     <h1 class="page-title">Agendamentos</h1>
-    <a href="/Agendamentos/Novo" class="btn-primary">Novo Agendamento</a>
+    <a href="/Agendamentos/Novo" class="btn-sm btn-green">
+        <i class="fas fa-plus"></i> Novo Agendamento
+    </a>
 </div>
 
-<div class="content-container">
-    <p>Agenda da clínica em desenvolvimento...</p>
+<div class="filtros-bar">
+    <label style="font-size:.85rem;font-weight:600;color:var(--texto-s)">
+        <i class="fas fa-calendar-day"></i> Agenda do dia:
+    </label>
+    <input type="date" id="data-filtro" onchange="carregarDia(this.value)" />
+    <button class="btn-sm btn-green" onclick="carregarTodos()">
+        <i class="fas fa-list"></i> Ver todos
+    </button>
+    <button class="btn-sm" style="background:var(--cinza);color:var(--texto-s)" onclick="irHoje()">
+        <i class="fas fa-calendar-check"></i> Hoje
+    </button>
 </div>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Tutor</th>
+                <th>Animal</th>
+                <th>Veterinário</th>
+                <th>Data / Hora</th>
+                <th>Status</th>
+                <th>Observação</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-body">
+            <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--texto-s)">Carregando...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+<script>
+function irHoje() {
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('data-filtro').value = hoje;
+    carregarDia(hoje);
+}
+
+async function carregarDia(data) {
+    if (!data) return;
+    try {
+        const res = await fetch(`/api/Agendamentos/agenda-dia?data=${data}`);
+        if (!res.ok) throw new Error();
+        renderTabela(await res.json());
+    } catch {
+        renderErro();
+    }
+}
+
+async function carregarTodos() {
+    document.getElementById('data-filtro').value = '';
+    try {
+        const res = await fetch('/api/Agendamentos');
+        if (!res.ok) throw new Error();
+        renderTabela(await res.json());
+    } catch {
+        renderErro();
+    }
+}
+
+function statusBadge(s) {
+    const map = { Agendado: 'badge-agendado', Concluido: 'badge-concluido', Cancelado: 'badge-cancelado' };
+    return `<span class="badge-status ${map[s] || 'badge-agendado'}">${s}</span>`;
+}
+
+function renderTabela(lista) {
+    const tbody = document.getElementById('tabela-body');
+    if (!lista.length) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-calendar-xmark"></i>Nenhum agendamento encontrado.</div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = lista.map(a => {
+        const dt = new Date(a.dataHoraConsulta);
+        const dtFmt = dt.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+        const podeAcionar = a.status === 'Agendado';
+        return `
+        <tr>
+            <td>${a.id}</td>
+            <td>${a.tutorNome}</td>
+            <td>${a.animalNome}</td>
+            <td>${a.veterinarioNome}</td>
+            <td>${dtFmt}</td>
+            <td>${statusBadge(a.status)}</td>
+            <td>${a.observacao || '—'}</td>
+            <td>
+                <div class="action-btns">
+                    ${podeAcionar ? `<button class="btn-icon cancel" title="Cancelar" onclick="cancelar(${a.id})"><i class="fas fa-ban"></i></button>` : ''}
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function renderErro() {
+    document.getElementById('tabela-body').innerHTML =
+        `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--rosa-d)"><i class="fas fa-circle-xmark"></i> Erro ao carregar agendamentos.</td></tr>`;
+}
+
+async function cancelar(id) {
+    if (!confirm('Cancelar este agendamento?')) return;
+    const res = await fetch(`/api/Agendamentos/${id}/cancelar`, { method: 'PATCH' });
+    if (res.ok) {
+        showToast('Agendamento cancelado.');
+        carregarTodos();
+    } else {
+        showToast('Erro ao cancelar.', 'error');
+    }
+}
+
+carregarTodos();
+</script>
+}

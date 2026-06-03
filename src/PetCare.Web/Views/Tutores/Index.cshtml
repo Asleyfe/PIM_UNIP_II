@@ -2,11 +2,126 @@
     ViewData["Title"] = "Gestão de Tutores";
 }
 
-<div class="header-container">
+<style>
+    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+    .search-bar input {
+        flex: 1; padding: 10px 16px; border: 1px solid var(--cinza-2);
+        border-radius: 50px; font-family: 'DM Sans', sans-serif;
+        font-size: .9rem; outline: none; background: #fff;
+    }
+    .search-bar input:focus { border-color: var(--verde-d); }
+    .badge-status {
+        padding: 3px 10px; border-radius: 50px; font-size: .75rem; font-weight: 600;
+        background: var(--verde-l); color: var(--verde-d);
+    }
+    .action-btns { display: flex; gap: 6px; }
+    .btn-icon {
+        width: 32px; height: 32px; border-radius: 8px; border: none;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        font-size: .85rem; transition: var(--trans);
+    }
+    .btn-icon.del { background: var(--rosa-l); color: var(--rosa-d); }
+    .btn-icon.del:hover { background: var(--rosa-d); color: #fff; }
+    .empty-state { text-align: center; padding: 48px 0; color: var(--texto-s); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; display: block; color: var(--cinza-2); }
+</style>
+
+<div class="header-container" style="margin-bottom:20px">
     <h1 class="page-title">Tutores</h1>
-    <a href="/Tutores/Cadastro" class="btn-primary">Novo Tutor</a>
+    <a href="/Tutores/Cadastro" class="btn-sm btn-green">
+        <i class="fas fa-plus"></i> Novo Tutor
+    </a>
 </div>
 
-<div class="content-container">
-    <p>Listagem de tutores em desenvolvimento...</p>
+<div class="search-bar">
+    <input type="text" id="busca" placeholder="Buscar por nome, CPF ou e-mail..." oninput="buscar(this.value)" />
+    <button class="btn-sm btn-green" onclick="carregarTutores()">
+        <i class="fas fa-rotate-right"></i>
+    </button>
 </div>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>Telefone</th>
+                <th>E-mail</th>
+                <th>Cidade</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela-body">
+            <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--texto-s)">Carregando...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+<script>
+let buscarTimeout = null;
+
+async function carregarTutores() {
+    const res = await fetch('/api/Tutores');
+    if (!res.ok) { renderErro(); return; }
+    const tutores = await res.json();
+    renderTabela(tutores);
+}
+
+function buscar(termo) {
+    clearTimeout(buscarTimeout);
+    if (!termo.trim()) { carregarTutores(); return; }
+    buscarTimeout = setTimeout(async () => {
+        const res = await fetch(`/api/Tutores/buscar?termo=${encodeURIComponent(termo)}`);
+        if (!res.ok) { renderErro(); return; }
+        const tutores = await res.json();
+        renderTabela(tutores);
+    }, 400);
+}
+
+function renderTabela(tutores) {
+    const tbody = document.getElementById('tabela-body');
+    if (!tutores.length) {
+        tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fas fa-users-slash"></i>Nenhum tutor encontrado.</div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = tutores.map(t => `
+        <tr>
+            <td>${t.id}</td>
+            <td><strong>${t.nome}</strong></td>
+            <td>${t.cpf}</td>
+            <td>${t.telefone}</td>
+            <td>${t.email}</td>
+            <td>${t.cidade}${t.estado ? ' / ' + t.estado : ''}</td>
+            <td>
+                <div class="action-btns">
+                    <button class="btn-icon del" title="Remover" onclick="remover(${t.id}, '${t.nome}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderErro() {
+    document.getElementById('tabela-body').innerHTML =
+        `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--rosa-d)"><i class="fas fa-circle-xmark"></i> Erro ao carregar tutores. Verifique a conexão.</td></tr>`;
+}
+
+async function remover(id, nome) {
+    if (!confirm(`Remover o tutor "${nome}"? Esta ação não pode ser desfeita.`)) return;
+    const res = await fetch(`/api/Tutores/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+        showToast(`Tutor "${nome}" removido com sucesso.`);
+        carregarTutores();
+    } else {
+        showToast('Erro ao remover tutor.', 'error');
+    }
+}
+
+carregarTutores();
+</script>
+}
