@@ -59,7 +59,7 @@ public class AgendamentosController : Controller
         try
         {
             var agendamento = await _agendamentoService.Agendar(dto);
-            return CreatedAtAction(nameof(ObterPorId), new { id = agendamento.Id }, agendamento);
+            return Created($"/api/Agendamentos/{agendamento.Id}", agendamento);
         }
         catch (ArgumentException ex)
         {

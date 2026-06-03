@@ -35,11 +35,14 @@ public class TutorService : ITutorService
 
     public async Task<TutorResponseDto> Cadastrar(TutorCreateDto dto)
     {
-        if (await _tutorRepository.ExistePorCpf(dto.Cpf))
+        var cpf = ApenasDigitos(dto.Cpf);
+        var telefone = ApenasDigitos(dto.Telefone);
+
+        if (await _tutorRepository.ExistePorCpf(cpf))
             throw new ArgumentException($"Já existe um tutor cadastrado com o CPF {dto.Cpf}.");
 
         var endereco = new Endereco(dto.Rua, dto.Numero, dto.Bairro, dto.Cidade, dto.Estado);
-        var tutor = new Tutor(dto.Nome, dto.Cpf, dto.Telefone, dto.Email, endereco);
+        var tutor = new Tutor(dto.Nome, cpf, telefone, dto.Email, endereco);
 
         var tutorInserido = await _tutorRepository.Inserir(tutor);
         return MapToDto(tutorInserido);
@@ -51,13 +54,15 @@ public class TutorService : ITutorService
         if (tutorExistente == null) return false;
 
         var endereco = new Endereco(dto.Rua, dto.Numero, dto.Bairro, dto.Cidade, dto.Estado);
+        var cpf = ApenasDigitos(dto.Cpf);
+        var telefone = ApenasDigitos(dto.Telefone);
         
         // Usando reflexão para atualizar campos, já que Tutor e Endereco são "imutáveis" via private setters no domínio
         // Mas o TutorRepository.Atualizar espera um objeto Tutor.
         // Como o domínio é focado em PIM e pode ser rígido, vou instanciar um novo ou atualizar via métodos se existirem.
         // Olhando Tutor.cs...
         
-        var tutorAtualizado = new Tutor(dto.Nome, dto.Cpf, dto.Telefone, dto.Email, endereco);
+        var tutorAtualizado = new Tutor(dto.Nome, cpf, telefone, dto.Email, endereco);
         tutorAtualizado.SetId(id);
 
         return await _tutorRepository.Atualizar(tutorAtualizado);
@@ -84,5 +89,10 @@ public class TutorService : ITutorService
             Estado = t.Endereco.Estado,
             CreatedAt = t.CreatedAt
         };
+    }
+
+    private static string ApenasDigitos(string valor)
+    {
+        return new string((valor ?? string.Empty).Where(char.IsDigit).ToArray());
     }
 }

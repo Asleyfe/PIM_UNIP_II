@@ -43,7 +43,7 @@ public class VeterinariosController : Controller
         try
         {
             var veterinario = await _veterinarioService.Cadastrar(dto);
-            return CreatedAtAction(nameof(ObterPorId), new { id = veterinario.Id }, veterinario);
+            return Created($"/api/Veterinarios/{veterinario.Id}", veterinario);
         }
         catch (ArgumentException ex)
         {

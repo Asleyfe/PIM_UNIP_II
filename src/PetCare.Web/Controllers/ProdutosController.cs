@@ -43,7 +43,7 @@ public class ProdutosController : Controller
         try
         {
             var produto = await _estoqueService.CadastrarProduto(dto);
-            return CreatedAtAction(nameof(ObterPorId), new { id = produto.Id }, produto);
+            return Created($"/api/Produtos/{produto.Id}", produto);
         }
         catch (ArgumentException ex)
         {

@@ -19,7 +19,7 @@ public class VendaRepository : IVendaRepository
         const string sqlVenda = """
             SELECT id, tutor_id AS TutorId, data_venda AS DataVenda, 
                    valor_total AS ValorTotal, forma_pagamento AS FormaPagamento, 
-                   observacao, created_at AS CreatedAt
+                   observacao, data_venda AS CreatedAt
             FROM venda
             WHERE id = @Id
             """;
@@ -27,7 +27,7 @@ public class VendaRepository : IVendaRepository
         const string sqlItens = """
             SELECT id, venda_id AS VendaId, produto_id AS ProdutoId, 
                    quantidade, preco_unitario AS PrecoUnitario, 
-                   created_at AS CreatedAt
+                   CURRENT_TIMESTAMP AS CreatedAt
             FROM item_venda
             WHERE venda_id = @Id
             """;
@@ -57,7 +57,7 @@ public class VendaRepository : IVendaRepository
         const string sql = """
             SELECT id, tutor_id AS TutorId, data_venda AS DataVenda, 
                    valor_total AS ValorTotal, forma_pagamento AS FormaPagamento, 
-                   observacao, created_at AS CreatedAt
+                   observacao, data_venda AS CreatedAt
             FROM venda
             ORDER BY data_venda DESC
             """;
@@ -75,7 +75,7 @@ public class VendaRepository : IVendaRepository
         const string sql = """
             INSERT INTO venda (tutor_id, data_venda, valor_total, forma_pagamento, observacao)
             VALUES (@TutorId, @DataVenda, @ValorTotal, @FormaPagamento, @Observacao)
-            RETURNING id, created_at AS CreatedAt
+            RETURNING id
             """;
 
         using var connection = _connectionFactory.CreateConnection();
@@ -89,7 +89,7 @@ public class VendaRepository : IVendaRepository
         });
 
         venda.SetId((long)resultado.id);
-        venda.SetCreatedAt((DateTime)resultado.createdat);
+        venda.SetCreatedAt(venda.DataVenda);
 
         return venda;
     }
@@ -157,7 +157,7 @@ public class VendaRepository : IVendaRepository
             const string sqlVenda = """
                 INSERT INTO venda (tutor_id, data_venda, valor_total, forma_pagamento, observacao)
                 VALUES (@TutorId, @DataVenda, @ValorTotal, @FormaPagamento, @Observacao)
-                RETURNING id, created_at AS CreatedAt
+                RETURNING id
                 """;
 
             var resultadoVenda = await connection.QuerySingleAsync(sqlVenda, new
@@ -170,13 +170,13 @@ public class VendaRepository : IVendaRepository
             }, transaction);
 
             venda.SetId((long)resultadoVenda.id);
-            venda.SetCreatedAt((DateTime)resultadoVenda.createdat);
+            venda.SetCreatedAt(venda.DataVenda);
 
             // 2. Insere os Itens
             const string sqlItem = """
                 INSERT INTO item_venda (venda_id, produto_id, quantidade, preco_unitario)
                 VALUES (@VendaId, @ProdutoId, @Quantidade, @PrecoUnitario)
-                RETURNING id, created_at AS CreatedAt
+                RETURNING id
                 """;
 
             foreach (var item in itens)
@@ -193,7 +193,7 @@ public class VendaRepository : IVendaRepository
                 }, transaction);
 
                 item.SetId((long)resultadoItem.id);
-                item.SetCreatedAt((DateTime)resultadoItem.createdat);
+                item.SetCreatedAt(venda.DataVenda);
             }
 
             transaction.Commit();
@@ -211,7 +211,7 @@ public class VendaRepository : IVendaRepository
         const string sql = """
             SELECT id, tutor_id AS TutorId, data_venda AS DataVenda, 
                    valor_total AS ValorTotal, forma_pagamento AS FormaPagamento, 
-                   observacao, created_at AS CreatedAt
+                   observacao, data_venda AS CreatedAt
             FROM venda
             WHERE data_venda BETWEEN @Inicio AND @Fim
             ORDER BY data_venda DESC

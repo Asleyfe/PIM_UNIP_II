@@ -20,7 +20,7 @@ public class ProntuarioRepository : IProntuarioRepository
             SELECT id, agendamento_id AS AgendamentoId, queixa_principal AS QueixaPrincipal, 
                    relato_tutor AS RelatoTutor, exame_fisico AS ExameFisico, 
                    diagnostico, prescricao, observacoes, 
-                   data_registro AS DataRegistro, created_at AS CreatedAt
+                   data_registro AS DataRegistro, data_registro AS CreatedAt
             FROM prontuario
             WHERE id = @Id
             """;
@@ -36,7 +36,7 @@ public class ProntuarioRepository : IProntuarioRepository
             SELECT id, agendamento_id AS AgendamentoId, queixa_principal AS QueixaPrincipal, 
                    relato_tutor AS RelatoTutor, exame_fisico AS ExameFisico, 
                    diagnostico, prescricao, observacoes, 
-                   data_registro AS DataRegistro, created_at AS CreatedAt
+                   data_registro AS DataRegistro, data_registro AS CreatedAt
             FROM prontuario
             ORDER BY data_registro DESC
             """;
@@ -51,7 +51,7 @@ public class ProntuarioRepository : IProntuarioRepository
         const string sql = """
             INSERT INTO prontuario (agendamento_id, queixa_principal, relato_tutor, exame_fisico, diagnostico, prescricao, observacoes, data_registro)
             VALUES (@AgendamentoId, @QueixaPrincipal, @RelatoTutor, @ExameFisico, @Diagnostico, @Prescricao, @Observacoes, @DataRegistro)
-            RETURNING id, created_at AS CreatedAt
+            RETURNING id
             """;
 
         using var connection = _connectionFactory.CreateConnection();
@@ -68,7 +68,7 @@ public class ProntuarioRepository : IProntuarioRepository
         });
 
         prontuario.SetId((long)resultado.id);
-        prontuario.SetCreatedAt((DateTime)resultado.createdat);
+        prontuario.SetCreatedAt(prontuario.DataRegistro);
 
         return prontuario;
     }
@@ -113,7 +113,7 @@ public class ProntuarioRepository : IProntuarioRepository
             SELECT id, agendamento_id AS AgendamentoId, queixa_principal AS QueixaPrincipal, 
                    relato_tutor AS RelatoTutor, exame_fisico AS ExameFisico, 
                    diagnostico, prescricao, observacoes, 
-                   data_registro AS DataRegistro, created_at AS CreatedAt
+                   data_registro AS DataRegistro, data_registro AS CreatedAt
             FROM prontuario
             WHERE agendamento_id = @AgendamentoId
             """;

@@ -125,8 +125,8 @@ document.getElementById('form-tutor').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const nome = document.getElementById('nome').value.trim();
-    const cpf  = document.getElementById('cpf').value.trim();
-    const tel  = document.getElementById('telefone').value.trim();
+    const cpf  = document.getElementById('cpf').value.replace(/\D/g, '');
+    const tel  = document.getElementById('telefone').value.replace(/\D/g, '');
     const email= document.getElementById('email').value.trim();
 
     if (!nome || !cpf || !tel || !email) {

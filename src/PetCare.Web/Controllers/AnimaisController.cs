@@ -56,7 +56,7 @@ public class AnimaisController : Controller
         try
         {
             var animal = await _animalService.Cadastrar(dto);
-            return CreatedAtAction(nameof(ObterPorId), new { id = animal.Id }, animal);
+            return Created($"/api/Animais/{animal.Id}", animal);
         }
         catch (ArgumentException ex)
         {

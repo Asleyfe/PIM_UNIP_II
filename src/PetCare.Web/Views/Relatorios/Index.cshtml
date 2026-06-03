@@ -58,9 +58,9 @@
         </div>
     </div>
 
-    <!-- Relatório de Animais Mais Atendidos -->
+    <!-- Relatório de Produtos Mais Vendidos -->
     <div class="rel-card">
-        <h2><i class="fas fa-paw"></i> Animais Mais Atendidos</h2>
+        <h2><i class="fas fa-box"></i> Produtos Mais Vendidos</h2>
         <div style="margin-bottom:14px">
             <button class="btn-sm btn-green" onclick="gerarAnimaisMaisAtendidos()">
                 <i class="fas fa-chart-pie"></i> Gerar
@@ -113,7 +113,7 @@ async function gerarFaturamento() {
         `;
         if (d.porCategoria?.length) {
             html += d.porCategoria.map(c =>
-                `<div class="stat-row"><span>${c.categoria}</span><strong>R$ ${c.faturamento.toFixed(2).replace('.',',')}</strong></div>`
+                `<div class="stat-row"><span>${c.categoria}</span><strong>R$ ${c.valor.toFixed(2).replace('.',',')}</strong></div>`
             ).join('');
         }
         div.innerHTML = html;
@@ -130,12 +130,12 @@ async function gerarAtendimentos() {
 
     div.innerHTML = '<p style="color:var(--texto-s);font-size:.85rem">Carregando...</p>';
     try {
-        const res = await fetch(`/api/Relatorios/atendimentos-por-veterinario?inicio=${inicio}&fim=${fim}`);
+        const res = await fetch(`/api/Relatorios/desempenho-profissionais?inicio=${inicio}&fim=${fim}`);
         if (!res.ok) throw new Error();
         const lista = await res.json();
         if (!lista.length) { div.innerHTML = '<p style="color:var(--texto-s);font-size:.85rem">Nenhum atendimento no período.</p>'; return; }
         div.innerHTML = lista.map(v =>
-            `<div class="stat-row"><span>${v.veterinarioNome}</span><strong>${v.totalAtendimentos} atendimento(s)</strong></div>`
+            `<div class="stat-row"><span>${v.nomeVeterinario}</span><strong>${v.totalAtendimentos} atendimento(s)</strong></div>`
         ).join('');
     } catch {
         div.innerHTML = '<p style="color:var(--rosa-d);font-size:.85rem"><i class="fas fa-circle-xmark"></i> Erro ao gerar relatório.</p>';
@@ -146,12 +146,14 @@ async function gerarAnimaisMaisAtendidos() {
     const div = document.getElementById('resultado-animais');
     div.innerHTML = '<p style="color:var(--texto-s);font-size:.85rem">Carregando...</p>';
     try {
-        const res = await fetch('/api/Relatorios/animais-mais-atendidos');
+        const inicio = inicioMes();
+        const fim = hoje();
+        const res = await fetch(`/api/Relatorios/produtos-mais-vendidos?inicio=${inicio}&fim=${fim}`);
         if (!res.ok) throw new Error();
         const lista = await res.json();
         if (!lista.length) { div.innerHTML = '<p style="color:var(--texto-s);font-size:.85rem">Nenhum dado disponível.</p>'; return; }
         div.innerHTML = lista.map(a =>
-            `<div class="stat-row"><span>${a.animalNome}</span><strong>${a.totalAtendimentos} atendimento(s)</strong></div>`
+            `<div class="stat-row"><span>${a.nomeProduto}</span><strong>${a.quantidadeVendida} venda(s)</strong></div>`
         ).join('');
     } catch {
         div.innerHTML = '<p style="color:var(--rosa-d);font-size:.85rem"><i class="fas fa-circle-xmark"></i> Erro ao gerar relatório.</p>';

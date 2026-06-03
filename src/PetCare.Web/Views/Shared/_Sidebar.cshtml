@@ -1,5 +1,5 @@
 <div class="sidebar-section">Menu</div>
-<a href="/" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "ativo" : "")" id="nav-home">
+<a href="/Home/Index" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "ativo" : "")" id="nav-home">
     <i class="fas fa-fw fa-house"></i> Início
 </a>
 <a href="/Dashboard" class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "ativo" : "")" id="nav-dashboard">

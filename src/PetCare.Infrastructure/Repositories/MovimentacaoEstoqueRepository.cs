@@ -19,7 +19,7 @@ public class MovimentacaoEstoqueRepository : IMovimentacaoEstoqueRepository
     {
         const string sql = """
             SELECT id, produto_id AS ProdutoId, quantidade, tipo, 
-                   data_movimentacao AS DataMovimentacao, created_at AS CreatedAt
+                   data_movimentacao AS DataMovimentacao, data_movimentacao AS CreatedAt
             FROM movimentacao_estoque
             WHERE id = @Id
             """;
@@ -33,7 +33,7 @@ public class MovimentacaoEstoqueRepository : IMovimentacaoEstoqueRepository
     {
         const string sql = """
             SELECT id, produto_id AS ProdutoId, quantidade, tipo, 
-                   data_movimentacao AS DataMovimentacao, created_at AS CreatedAt
+                   data_movimentacao AS DataMovimentacao, data_movimentacao AS CreatedAt
             FROM movimentacao_estoque
             ORDER BY data_movimentacao DESC
             """;
@@ -48,7 +48,7 @@ public class MovimentacaoEstoqueRepository : IMovimentacaoEstoqueRepository
         const string sql = """
             INSERT INTO movimentacao_estoque (produto_id, quantidade, tipo, data_movimentacao)
             VALUES (@ProdutoId, @Quantidade, @Tipo, @DataMovimentacao)
-            RETURNING id, created_at AS CreatedAt
+            RETURNING id
             """;
 
         using var connection = _connectionFactory.CreateConnection();
@@ -61,7 +61,7 @@ public class MovimentacaoEstoqueRepository : IMovimentacaoEstoqueRepository
         });
 
         movimentacao.SetId((long)resultado.id);
-        movimentacao.SetCreatedAt((DateTime)resultado.createdat);
+        movimentacao.SetCreatedAt(movimentacao.DataMovimentacao);
 
         return movimentacao;
     }
@@ -102,7 +102,7 @@ public class MovimentacaoEstoqueRepository : IMovimentacaoEstoqueRepository
     {
         const string sql = """
             SELECT id, produto_id AS ProdutoId, quantidade, tipo, 
-                   data_movimentacao AS DataMovimentacao, created_at AS CreatedAt
+                   data_movimentacao AS DataMovimentacao, data_movimentacao AS CreatedAt
             FROM movimentacao_estoque
             WHERE produto_id = @ProdutoId
             ORDER BY data_movimentacao DESC

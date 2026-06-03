@@ -20,7 +20,7 @@ public class LembreteRepository : ILembreteRepository
         const string sql = """
             SELECT id, tutor_id as TutorId, animal_id as AnimalId, agendamento_id as AgendamentoId,
                    tipo, meio_envio as MeioEnvio, status_envio as StatusEnvio, data_envio as DataEnvio,
-                   mensagem, created_at as CreatedAt
+                   mensagem, data_envio as CreatedAt
             FROM lembrete_enviado
             WHERE id = @Id
             """;
@@ -34,7 +34,7 @@ public class LembreteRepository : ILembreteRepository
         const string sql = """
             SELECT id, tutor_id as TutorId, animal_id as AnimalId, agendamento_id as AgendamentoId,
                    tipo, meio_envio as MeioEnvio, status_envio as StatusEnvio, data_envio as DataEnvio,
-                   mensagem, created_at as CreatedAt
+                   mensagem, data_envio as CreatedAt
             FROM lembrete_enviado
             ORDER BY data_envio DESC
             """;
@@ -48,7 +48,7 @@ public class LembreteRepository : ILembreteRepository
         const string sql = """
             INSERT INTO lembrete_enviado (tutor_id, animal_id, agendamento_id, tipo, meio_envio, status_envio, data_envio, mensagem)
             VALUES (@TutorId, @AnimalId, @AgendamentoId, @Tipo, @MeioEnvio, @StatusEnvio, @DataEnvio, @Mensagem)
-            RETURNING id, created_at as CreatedAt
+            RETURNING id
             """;
 
         using var connection = _connectionFactory.CreateConnection();
@@ -65,7 +65,7 @@ public class LembreteRepository : ILembreteRepository
         });
 
         lembrete.SetId((long)resultado.id);
-        lembrete.SetCreatedAt((DateTime)resultado.createdat);
+        lembrete.SetCreatedAt(lembrete.DataEnvio);
 
         return lembrete;
     }
@@ -103,7 +103,7 @@ public class LembreteRepository : ILembreteRepository
         const string sql = """
             SELECT id, tutor_id as TutorId, animal_id as AnimalId, agendamento_id as AgendamentoId,
                    tipo, meio_envio as MeioEnvio, status_envio as StatusEnvio, data_envio as DataEnvio,
-                   mensagem, created_at as CreatedAt
+                   mensagem, data_envio as CreatedAt
             FROM lembrete_enviado
             WHERE tutor_id = @TutorId
             ORDER BY data_envio DESC
@@ -118,7 +118,7 @@ public class LembreteRepository : ILembreteRepository
         const string sql = """
             SELECT id, tutor_id as TutorId, animal_id as AnimalId, agendamento_id as AgendamentoId,
                    tipo, meio_envio as MeioEnvio, status_envio as StatusEnvio, data_envio as DataEnvio,
-                   mensagem, created_at as CreatedAt
+                   mensagem, data_envio as CreatedAt
             FROM lembrete_enviado
             WHERE animal_id = @AnimalId
             ORDER BY data_envio DESC

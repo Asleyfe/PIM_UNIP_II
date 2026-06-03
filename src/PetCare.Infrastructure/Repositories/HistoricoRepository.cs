@@ -18,7 +18,7 @@ public class HistoricoRepository : IHistoricoRepository
     {
         const string sql = """
             SELECT id, animal_id as AnimalId, veterinario_id as VeterinarioId, 
-                   descricao, data_registro as DataRegistro, created_at as CreatedAt
+                   descricao, data_registro as DataRegistro, data_registro as CreatedAt
             FROM historico_clinico
             WHERE id = @Id
             """;
@@ -31,7 +31,7 @@ public class HistoricoRepository : IHistoricoRepository
     {
         const string sql = """
             SELECT id, animal_id as AnimalId, veterinario_id as VeterinarioId, 
-                   descricao, data_registro as DataRegistro, created_at as CreatedAt
+                   descricao, data_registro as DataRegistro, data_registro as CreatedAt
             FROM historico_clinico
             ORDER BY data_registro DESC
             """;
@@ -45,7 +45,7 @@ public class HistoricoRepository : IHistoricoRepository
         const string sql = """
             INSERT INTO historico_clinico (animal_id, veterinario_id, descricao, data_registro)
             VALUES (@AnimalId, @VeterinarioId, @Descricao, @DataRegistro)
-            RETURNING id, created_at as CreatedAt
+            RETURNING id
             """;
 
         using var connection = _connectionFactory.CreateConnection();
@@ -58,7 +58,7 @@ public class HistoricoRepository : IHistoricoRepository
         });
 
         historico.SetId((long)resultado.id);
-        historico.SetCreatedAt((DateTime)resultado.createdat);
+        historico.SetCreatedAt(historico.DataRegistro);
 
         return historico;
     }
@@ -94,7 +94,7 @@ public class HistoricoRepository : IHistoricoRepository
     {
         const string sql = """
             SELECT id, animal_id as AnimalId, veterinario_id as VeterinarioId, 
-                   descricao, data_registro as DataRegistro, created_at as CreatedAt
+                   descricao, data_registro as DataRegistro, data_registro as CreatedAt
             FROM historico_clinico
             WHERE animal_id = @AnimalId
             ORDER BY data_registro DESC

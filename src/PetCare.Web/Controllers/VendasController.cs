@@ -50,7 +50,7 @@ public class VendasController : Controller
         try
         {
             var venda = await _vendaService.RealizarVenda(dto);
-            return CreatedAtAction(nameof(ObterPorId), new { id = venda.Id }, venda);
+            return Created($"/api/Vendas/{venda.Id}", venda);
         }
         catch (ArgumentException ex)
         {

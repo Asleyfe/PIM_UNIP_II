@@ -17,7 +17,7 @@ public class AnimalService : IAnimalService
 
     public async Task<AnimalResponseDto> Cadastrar(AnimalCreateDto dto)
     {
-        if (!Enum.TryParse<Sexo>(dto.Sexo, true, out var sexo))
+        if (!TryObterSexo(dto.Sexo, out var sexo))
             throw new ArgumentException("Sexo inválido. Use 'M' ou 'F'.");
 
         var animal = new Animal(
@@ -32,6 +32,25 @@ public class AnimalService : IAnimalService
         var animalInserido = await _animalRepository.Inserir(animal);
 
         return MapToDto(animalInserido);
+    }
+
+    private static bool TryObterSexo(string? valor, out Sexo sexo)
+    {
+        switch ((valor ?? string.Empty).Trim().ToUpperInvariant())
+        {
+            case "M":
+            case "MACHO":
+                sexo = Sexo.Macho;
+                return true;
+            case "F":
+            case "FEMEA":
+            case "FÊMEA":
+                sexo = Sexo.Femea;
+                return true;
+            default:
+                sexo = default;
+                return false;
+        }
     }
 
     public async Task<IEnumerable<AnimalResponseDto>> ListarTodos()

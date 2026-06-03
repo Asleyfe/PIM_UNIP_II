@@ -31,11 +31,15 @@
         <div class="form-grid">
             <div class="form-group">
                 <label>ID do Tutor *</label>
-                <input type="number" id="tutorId" placeholder="ID do tutor" min="1" required />
+                <select id="tutorId" required>
+                    <option value="">Carregando...</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>ID do Animal *</label>
-                <input type="number" id="animalId" placeholder="ID do animal" min="1" required />
+                <select id="animalId" required>
+                    <option value="">Carregando...</option>
+                </select>
             </div>
         </div>
 
@@ -43,7 +47,9 @@
         <div class="form-grid">
             <div class="form-group">
                 <label>ID do Veterinário *</label>
-                <input type="number" id="veterinarioId" placeholder="ID do veterinário" min="1" required />
+                <select id="veterinarioId" required>
+                    <option value="">Carregando...</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>Data e Hora *</label>
@@ -68,6 +74,31 @@
 <script>
 // Define mínimo como agora
 document.getElementById('dataHora').min = new Date().toISOString().slice(0,16);
+
+async function preencherSelect(url, selectId, texto, vazio) {
+    const select = document.getElementById(selectId);
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error();
+        const dados = await res.json();
+        select.innerHTML = `<option value="">${vazio}</option>` + dados.map(item =>
+            `<option value="${item.id}">${texto(item)}</option>`
+        ).join('');
+    } catch {
+        select.innerHTML = '<option value="">Erro ao carregar</option>';
+    }
+}
+
+async function carregarAnimais(tutorId = '') {
+    const url = tutorId ? `/api/Animais/tutor/${tutorId}` : '/api/Animais';
+    await preencherSelect(url, 'animalId', a => `${a.nome} - #${a.id}`, 'Selecione o animal...');
+}
+
+preencherSelect('/api/Tutores', 'tutorId', t => `${t.nome} - CPF ${t.cpf}`, 'Selecione o tutor...');
+preencherSelect('/api/Veterinarios', 'veterinarioId', v => `${v.nome} - CRMV ${v.crmv}`, 'Selecione o veterinario...');
+carregarAnimais();
+
+document.getElementById('tutorId').addEventListener('change', e => carregarAnimais(e.target.value));
 
 document.getElementById('form-agendamento').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -113,3 +144,4 @@ document.getElementById('form-agendamento').addEventListener('submit', async (e)
 });
 </script>
 }
+

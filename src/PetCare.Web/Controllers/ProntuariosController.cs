@@ -23,7 +23,14 @@ public class ProntuariosController : Controller
     [HttpGet("Registro")]
     public IActionResult Registro()
     {
-        return View();
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet("/api/Prontuarios")]
+    public async Task<IActionResult> Listar()
+    {
+        var prontuarios = await _prontuarioService.ListarTodos();
+        return Ok(prontuarios);
     }
 
     [HttpGet("/api/Prontuarios/{id:long}")]
@@ -52,7 +59,7 @@ public class ProntuariosController : Controller
         try
         {
             var prontuario = await _prontuarioService.Registrar(dto);
-            return CreatedAtAction(nameof(ObterPorId), new { id = prontuario.Id }, prontuario);
+            return Created($"/api/Prontuarios/{prontuario.Id}", prontuario);
         }
         catch (ArgumentException ex)
         {

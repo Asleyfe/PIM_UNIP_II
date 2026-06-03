@@ -59,7 +59,7 @@ public class TutoresController : Controller
         try
         {
             var tutor = await _tutorService.Cadastrar(dto);
-            return CreatedAtAction(nameof(ObterPorId), new { id = tutor.Id }, tutor);
+            return Created($"/api/Tutores/{tutor.Id}", tutor);
         }
         catch (ArgumentException ex)
         {

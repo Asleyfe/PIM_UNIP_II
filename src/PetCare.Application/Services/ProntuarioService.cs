@@ -25,6 +25,12 @@ public class ProntuarioService : IProntuarioService
         return p == null ? null : MapToDto(p);
     }
 
+    public async Task<IEnumerable<ProntuarioResponseDto>> ListarTodos()
+    {
+        var prontuarios = await _prontuarioRepository.Listar();
+        return prontuarios.Select(MapToDto);
+    }
+
     public async Task<ProntuarioResponseDto?> ObterPorAgendamento(long agendamentoId)
     {
         var p = await _prontuarioRepository.ObterPorAgendamento(agendamentoId);
